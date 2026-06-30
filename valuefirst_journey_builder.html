@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ValueFirst · Journey Builder Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vf-green: #00C566;
+    --vf-green-dark: #009A4F;
+    --vf-green-glow: rgba(0,197,102,0.18);
+    --vf-navy: #0A0F1E;
+    --vf-navy2: #111827;
+    --vf-navy3: #1C2436;
+    --vf-border: rgba(255,255,255,0.08);
+    --vf-text: #F0F4FF;
+    --vf-muted: rgba(240,244,255,0.5);
+    --wa-green: #25D366;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; min-height: 100vh; background: var(--vf-navy); font-family: 'Inter', sans-serif; color: var(--vf-text); overflow-x: hidden; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px; border-bottom: 1px solid var(--vf-border);
+    background: rgba(10,15,30,0.95); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 36px; height: 36px; background: var(--vf-green);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: #000;
+  }
+  .logo-name { font-weight: 700; font-size: 17px; color: var(--vf-text); }
+  .logo-tag { font-size: 11px; color: var(--vf-muted); font-weight: 400; margin-top: 1px; }
+  .header-badge {
+    background: var(--vf-green-glow); border: 1px solid rgba(0,197,102,0.3);
+    color: var(--vf-green); border-radius: 20px; padding: 5px 14px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  }
+
+  /* ══════════════ SCREEN 1 · SPLASH ══════════════ */
+  #splash { align-items: center; justify-content: center; text-align: center; padding: 60px 24px; position: relative; overflow: hidden; }
+  .splash-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 10%, rgba(0,197,102,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .splash-grid {
+    position: absolute; inset: 0; z-index: 0; opacity: 0.04;
+    background-image: linear-gradient(rgba(0,197,102,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,197,102,1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .splash-inner { position: relative; z-index: 1; max-width: 680px; }
+  .splash-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(0,197,102,0.1); border: 1px solid rgba(0,197,102,0.25);
+    border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600;
+    color: var(--vf-green); letter-spacing: 0.08em; margin-bottom: 28px;
+  }
+  .splash-eyebrow::before { content: '●'; font-size: 8px; animation: pulse-dot 1.5s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .splash-h1 {
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px, 6vw, 62px);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.02em;
+    margin-bottom: 20px; color: #fff;
+  }
+  .splash-h1 em { font-style: normal; color: var(--vf-green); }
+  .splash-sub { font-size: 17px; color: var(--vf-muted); line-height: 1.7; margin-bottom: 44px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .prizes-strip {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 44px;
+  }
+  .prize-card {
+    background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius); padding: 16px 22px; display: flex;
+    align-items: center; gap: 12px; min-width: 180px;
+  }
+  .prize-icon { font-size: 30px; }
+  .prize-label { font-size: 12px; color: var(--vf-muted); }
+  .prize-val { font-size: 15px; font-weight: 600; color: var(--vf-text); margin-top: 2px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--vf-green); color: #000; font-weight: 700; font-size: 16px;
+    border: none; border-radius: 40px; padding: 16px 40px; cursor: pointer;
+    transition: all 0.2s; font-family: 'Inter', sans-serif;
+    box-shadow: 0 0 0 0 rgba(0,197,102,0.4);
+  }
+  .btn-primary:hover { background: #00e07a; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,197,102,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--vf-text); font-weight: 600; font-size: 15px;
+    border: 1px solid var(--vf-border); border-radius: 40px; padding: 13px 32px;
+    cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+
+  /* ══════════════ SCREEN 2 · LEAD FORM ══════════════ */
+  #lead-form-screen {
+    align-items: center; justify-content: center; padding: 40px 24px;
+  }
+  .form-card {
+    background: var(--vf-navy2); border: 1px solid var(--vf-border);
+    border-radius: 20px; padding: 44px 48px; max-width: 520px; width: 100%;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+  .form-step-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--vf-green);
+    margin-bottom: 10px;
+  }
+  .form-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .form-sub { font-size: 14px; color: var(--vf-muted); margin-bottom: 32px; line-height: 1.6; }
+  .form-row { margin-bottom: 20px; }
+  .form-row label { display: block; font-size: 13px; font-weight: 600; color: var(--vf-muted); margin-bottom: 8px; letter-spacing: 0.04em; }
+  .form-row input, .form-row select {
+    width: 100%; background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius-sm); padding: 13px 16px; font-size: 15px; color: var(--vf-text);
+    font-family: 'Inter', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  .form-row input::placeholder { color: rgba(240,244,255,0.3); }
+  .form-row input:focus, .form-row select:focus {
+    border-color: var(--vf-green); box-shadow: 0 0 0 3px rgba(0,197,102,0.15);
+  }
+  .form-row select option { background: #1C2436; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 28px; }
+  .consent-row input[type=checkbox] { margin-top: 3px; accent-color: var(--vf-green); width: 16px; height: 16px; flex-shrink: 0; }
+  .consent-row span { font-size: 12px; color: var(--vf-muted); line-height: 1.6; }
+  .consent-row a { color: var(--vf-green); text-decoration: none; }
+  .form-error { color: #ff6b6b; font-size: 12px; margin-top: 6px; display: none; }
+
+  /* ══════════════ SCREEN 3 · GAME ══════════════ */
+  #game-screen { padding: 0; }
+  .game-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--vf-border);
+    background: var(--vf-navy2);
+  }
+  .scenario-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: 20px; padding: 7px 16px;
+  }
+  .scenario-icon { font-size: 16px; }
+  .scenario-label { font-size: 11px; color: var(--vf-muted); line-height: 1; }
+  .scenario-name { font-size: 13px; font-weight: 600; color: var(--vf-text); }
+  .score-strip { display: flex; gap: 20px; align-items: center; }
+  .score-item { text-align: center; }
+  .score-item .sv { font-size: 22px; font-weight: 800; color: var(--vf-green); font-family: 'Space Grotesk', sans-serif; }
+  .score-item .sl { font-size: 10px; color: var(--vf-muted); letter-spacing: 0.06em; font-weight: 600; }
+  .timer-ring { position: relative; width: 52px; height: 52px; }
+  .timer-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .timer-ring .timer-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--vf-green); font-family: 'Space Grotesk', sans-serif; }
+
+  .game-body { display: flex; flex: 1; gap: 0; overflow: hidden; min-height: calc(100vh - 130px); }
+
+  /* Left: scenario */
+  .scenario-panel {
+    width: 300px; flex-shrink: 0; background: var(--vf-navy2);
+    border-right: 1px solid var(--vf-border); padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 0; overflow-y: auto;
+  }
+  .scenario-header { margin-bottom: 20px; }
+  .scenario-header h3 { font-size: 13px; font-weight: 700; color: var(--vf-green); letter-spacing: 0.08em; margin-bottom: 10px; }
+  .scenario-box {
+    background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .scenario-emoji { font-size: 28px; margin-bottom: 8px; }
+  .scenario-desc { font-size: 14px; line-height: 1.7; color: var(--vf-text); font-weight: 500; }
+  .scenario-desc strong { color: var(--vf-green); }
+
+  .objective-section { margin-top: 24px; }
+  .objective-section h3 { font-size: 13px; font-weight: 700; color: var(--vf-muted); letter-spacing: 0.08em; margin-bottom: 12px; }
+  .objective-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: var(--radius-sm); margin-bottom: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--vf-border);
+    font-size: 13px; color: var(--vf-muted); transition: all 0.3s;
+  }
+  .objective-item.done { background: rgba(0,197,102,0.08); border-color: rgba(0,197,102,0.25); color: var(--vf-text); }
+  .objective-item .obj-num {
+    width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    flex-shrink: 0; color: var(--vf-muted); transition: all 0.3s;
+  }
+  .objective-item.done .obj-num { background: var(--vf-green); border-color: var(--vf-green); color: #000; }
+
+  .hint-box {
+    margin-top: 20px; padding: 14px; background: rgba(0,197,102,0.06);
+    border: 1px solid rgba(0,197,102,0.2); border-radius: var(--radius-sm);
+    font-size: 12px; color: rgba(0,197,102,0.85); line-height: 1.6;
+  }
+  .hint-box strong { color: var(--vf-green); }
+
+  /* Middle: drop zone */
+  .dropzone-panel {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 32px 24px; overflow-y: auto; gap: 0;
+  }
+  .dropzone-title { font-size: 13px; font-weight: 700; color: var(--vf-muted); letter-spacing: 0.08em; margin-bottom: 24px; }
+
+  .journey-lane {
+    display: flex; align-items: center; gap: 0; width: 100%; max-width: 640px;
+    margin-bottom: 32px; flex-wrap: wrap; justify-content: center;
+  }
+  .drop-slot {
+    width: 130px; min-height: 110px; border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: var(--radius); background: rgba(255,255,255,0.02);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: all 0.25s; position: relative; cursor: pointer; margin: 4px;
+  }
+  .drop-slot.over { border-color: var(--vf-green); background: var(--vf-green-glow); transform: scale(1.04); }
+  .drop-slot.filled { border-color: var(--vf-green); border-style: solid; background: rgba(0,197,102,0.07); }
+  .drop-slot.wrong { border-color: #ff4d6a; background: rgba(255,77,106,0.08); animation: shake 0.3s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .slot-num {
+    position: absolute; top: 8px; left: 10px; font-size: 10px; font-weight: 800;
+    color: rgba(255,255,255,0.2); letter-spacing: 0.06em;
+  }
+  .slot-placeholder { font-size: 26px; margin-bottom: 4px; opacity: 0.3; }
+  .slot-hint { font-size: 10px; color: rgba(255,255,255,0.2); text-align: center; padding: 0 8px; }
+
+  .arrow-connector {
+    font-size: 20px; color: rgba(255,255,255,0.2); flex-shrink: 0;
+    margin: 0 4px; display: flex; align-items: center;
+  }
+  .arrow-connector.lit { color: var(--vf-green); }
+
+  /* Placed card inside slot */
+  .placed-card {
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 10px; cursor: grab;
+  }
+  .placed-card .pc-icon { font-size: 26px; margin-bottom: 4px; }
+  .placed-card .pc-name { font-size: 11px; font-weight: 700; color: var(--vf-text); text-align: center; line-height: 1.3; }
+  .placed-card .pc-tag { font-size: 9px; color: var(--vf-green); font-weight: 600; margin-top: 3px; letter-spacing: 0.05em; }
+  .remove-btn {
+    position: absolute; top: 5px; right: 7px; font-size: 14px; cursor: pointer;
+    color: rgba(255,255,255,0.3); transition: color 0.2s; line-height: 1;
+  }
+  .remove-btn:hover { color: #ff6b6b; }
+
+  /* Right: card tray */
+  .tray-panel {
+    width: 240px; flex-shrink: 0; background: var(--vf-navy2);
+    border-left: 1px solid var(--vf-border); padding: 24px 18px;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .tray-title { font-size: 13px; font-weight: 700; color: var(--vf-muted); letter-spacing: 0.08em; margin-bottom: 16px; }
+  .tray-card {
+    background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px;
+    cursor: grab; transition: all 0.2s; user-select: none;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tray-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); transform: translateX(-2px); }
+  .tray-card:active { cursor: grabbing; }
+  .tray-card.dragging { opacity: 0.4; }
+  .tray-card.used { opacity: 0.25; pointer-events: none; }
+  .tc-icon { font-size: 24px; flex-shrink: 0; }
+  .tc-info { flex: 1; }
+  .tc-name { font-size: 13px; font-weight: 700; color: var(--vf-text); margin-bottom: 2px; }
+  .tc-desc { font-size: 10px; color: var(--vf-muted); line-height: 1.5; }
+
+  /* Submit row */
+  .submit-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+  .btn-check {
+    background: var(--vf-green); color: #000; border: none; border-radius: 30px;
+    padding: 13px 30px; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s; flex-shrink: 0;
+  }
+  .btn-check:hover { background: #00e07a; }
+  .btn-check:disabled { background: rgba(0,197,102,0.3); color: rgba(0,0,0,0.5); cursor: not-allowed; }
+  .tries-label { font-size: 12px; color: var(--vf-muted); }
+
+  /* Feedback bar */
+  .feedback-bar {
+    width: 100%; max-width: 640px; border-radius: var(--radius-sm);
+    padding: 14px 18px; font-size: 13px; font-weight: 600; line-height: 1.5;
+    margin-bottom: 16px; display: none;
+  }
+  .feedback-bar.correct { background: rgba(0,197,102,0.12); border: 1px solid rgba(0,197,102,0.3); color: #00e07a; display: block; }
+  .feedback-bar.wrong { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: #ff8096; display: block; }
+
+  /* Progress bar */
+  .progress-track {
+    width: 100%; max-width: 640px; height: 4px; background: rgba(255,255,255,0.08);
+    border-radius: 2px; margin-bottom: 24px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; background: var(--vf-green); border-radius: 2px; transition: width 0.5s; }
+
+  /* ══════════════ SCREEN 4 · RESULTS ══════════════ */
+  #result-screen { align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+  .result-card {
+    background: var(--vf-navy2); border: 1px solid var(--vf-border);
+    border-radius: 24px; padding: 52px 48px; max-width: 600px; width: 100%;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+  }
+  .result-glow {
+    position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,197,102,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .result-trophy { font-size: 64px; margin-bottom: 16px; animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes bounce-in { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .result-title { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .result-title em { font-style: normal; color: var(--vf-green); }
+  .result-sub { font-size: 15px; color: var(--vf-muted); margin-bottom: 36px; line-height: 1.7; }
+  .result-score-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 36px;
+  }
+  .result-stat {
+    background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius); padding: 18px 12px;
+  }
+  .result-stat .rs-val { font-size: 28px; font-weight: 800; color: var(--vf-green); font-family: 'Space Grotesk', sans-serif; }
+  .result-stat .rs-label { font-size: 11px; color: var(--vf-muted); margin-top: 4px; font-weight: 600; letter-spacing: 0.05em; }
+  .hamper-callout {
+    background: linear-gradient(135deg, rgba(0,197,102,0.12) 0%, rgba(0,100,50,0.08) 100%);
+    border: 1px solid rgba(0,197,102,0.3); border-radius: var(--radius);
+    padding: 22px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; text-align: left;
+  }
+  .hamper-icon { font-size: 40px; flex-shrink: 0; }
+  .hamper-text h4 { font-size: 15px; font-weight: 700; color: var(--vf-green); margin-bottom: 4px; }
+  .hamper-text p { font-size: 13px; color: var(--vf-muted); line-height: 1.6; }
+  .result-learning {
+    text-align: left; background: var(--vf-navy3); border: 1px solid var(--vf-border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 28px;
+  }
+  .result-learning h4 { font-size: 12px; font-weight: 700; color: var(--vf-muted); letter-spacing: 0.08em; margin-bottom: 14px; }
+  .learning-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; font-size: 13px; color: var(--vf-text); line-height: 1.6; }
+  .learning-item::before { content: '→'; color: var(--vf-green); font-weight: 700; flex-shrink: 0; }
+  .result-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* Confetti canvas */
+  #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+
+  /* ══════════════ MISC ══════════════ */
+  .scenario-nav {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .snav-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); transition: all 0.3s; cursor: pointer;
+  }
+  .snav-dot.done { background: var(--vf-green); }
+  .snav-dot.active { background: #fff; width: 24px; border-radius: 5px; }
+
+  .whatsapp-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.25);
+    border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: #25D366;
+  }
+
+  @media (max-width: 900px) {
+    .game-body { flex-direction: column; }
+    .scenario-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--vf-border); }
+    .tray-panel { width: 100%; border-left: none; border-top: 1px solid var(--vf-border); }
+    .form-card { padding: 28px 24px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .result-score-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ══ SCREEN 1: SPLASH ══ -->
+<div id="splash" class="screen active">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark">VF</div>
+      <div>
+        <div class="logo-name">ValueFirst</div>
+        <div class="logo-tag">CPaaS Arcade · Booth Experience</div>
+      </div>
+    </div>
+    <span class="whatsapp-badge">💬 Powered by WhatsApp Business API</span>
+  </div>
+  <div class="splash-bg"></div>
+  <div class="splash-grid"></div>
+  <div class="splash-inner">
+    <div class="splash-eyebrow">CPAAS SUMMIT · LIVE DEMO</div>
+    <h1 class="splash-h1">Build the Perfect<br><em>Customer Journey</em></h1>
+    <p class="splash-sub">
+      You're a brand manager. You get a real business scenario. Your job? Drag the right WhatsApp touchpoints in the correct order — and close the deal. Fast, fun, and exactly what ValueFirst's Infinito platform does for you.
+    </p>
+    <div class="prizes-strip">
+      <div class="prize-card">
+        <div class="prize-icon">🎁</div>
+        <div>
+          <div class="prize-label">Win a hamper</div>
+          <div class="prize-val">Top scorers</div>
+        </div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">⏱️</div>
+        <div>
+          <div class="prize-label">Time to play</div>
+          <div class="prize-val">Under 3 min</div>
+        </div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">🧠</div>
+        <div>
+          <div class="prize-label">Scenarios</div>
+          <div class="prize-val">3 Challenges</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="showScreen('lead-form-screen')">Start Playing →</button>
+    </div>
+    <p style="font-size:12px;color:var(--vf-muted);margin-top:18px;">Fill a quick form first · Takes 30 seconds · Win a hamper</p>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: LEAD FORM ══ -->
+<div id="lead-form-screen" class="screen">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark">VF</div>
+      <div>
+        <div class="logo-name">ValueFirst</div>
+        <div class="logo-tag">CPaaS Summit 2025</div>
+      </div>
+    </div>
+    <button class="btn-secondary" onclick="showScreen('splash')" style="font-size:13px;padding:8px 20px;">← Back</button>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px;">
+    <div class="form-card">
+      <div class="form-step-badge">STEP 1 OF 2 · REGISTER TO PLAY</div>
+      <h2 class="form-title">Who are you?</h2>
+      <p class="form-sub">Fill in your details to unlock the game and be eligible for the <strong style="color:var(--vf-green)">hamper giveaway</strong>. We promise, no spam — only the good kind of messages. 😄</p>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label>FIRST NAME *</label>
+          <input type="text" id="f-fname" placeholder="Rahul" />
+          <div class="form-error" id="err-fname">Required</div>
+        </div>
+        <div class="form-row">
+          <label>LAST NAME *</label>
+          <input type="text" id="f-lname" placeholder="Sharma" />
+          <div class="form-error" id="err-lname">Required</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>WORK EMAIL *</label>
+        <input type="email" id="f-email" placeholder="rahul@yourcompany.com" />
+        <div class="form-error" id="err-email">Enter a valid email</div>
+      </div>
+      <div class="form-row">
+        <label>PHONE NUMBER *</label>
+        <input type="tel" id="f-phone" placeholder="+91 98765 43210" />
+        <div class="form-error" id="err-phone">Required</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>COMPANY *</label>
+          <input type="text" id="f-company" placeholder="Acme Corp" />
+          <div class="form-error" id="err-company">Required</div>
+        </div>
+        <div class="form-row">
+          <label>INDUSTRY *</label>
+          <select id="f-industry">
+            <option value="">Select industry</option>
+            <option>E-commerce / Retail</option>
+            <option>BFSI / Fintech</option>
+            <option>Healthcare</option>
+            <option>EdTech</option>
+            <option>Travel & Hospitality</option>
+            <option>Logistics</option>
+            <option>SaaS / Tech</option>
+            <option>Other</option>
+          </select>
+          <div class="form-error" id="err-industry">Required</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>WHAT DOES YOUR COMPANY USE FOR CUSTOMER MESSAGING?</label>
+        <select id="f-current">
+          <option value="">Select current tool</option>
+          <option>Email only</option>
+          <option>SMS</option>
+          <option>WhatsApp Business App</option>
+          <option>WhatsApp API (via partner)</option>
+          <option>In-app notifications</option>
+          <option>Multiple channels</option>
+          <option>Nothing yet</option>
+        </select>
+      </div>
+      <div class="consent-row">
+        <input type="checkbox" id="f-consent" />
+        <span>I agree that ValueFirst may contact me about their products and services. Read our <a href="#">Privacy Policy</a>.</span>
+      </div>
+      <div class="form-error" id="err-consent" style="margin-bottom:12px;">Please accept to continue</div>
+      <button class="btn-primary" onclick="submitLead()" style="width:100%;justify-content:center;">Let's Play → </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: GAME ══ -->
+<div id="game-screen" class="screen">
+  <div class="header" style="padding:12px 24px;">
+    <div class="logo">
+      <div class="logo-mark">VF</div>
+      <div>
+        <div class="logo-name">Journey Builder</div>
+        <div class="logo-tag" id="player-name-tag">Player</div>
+      </div>
+    </div>
+    <div class="score-strip">
+      <div class="score-item">
+        <div class="sv" id="score-display">0</div>
+        <div class="sl">SCORE</div>
+      </div>
+      <div class="score-item">
+        <div class="sv" id="scenario-num-display">1/3</div>
+        <div class="sl">SCENARIO</div>
+      </div>
+      <div class="timer-ring" id="timer-widget">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+          <circle id="timer-arc" cx="26" cy="26" r="22" fill="none" stroke="#00C566" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="138" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-num" id="timer-num">45</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario navigation dots -->
+  <div style="display:flex;justify-content:center;padding:10px;gap:6px;" id="scenario-dots"></div>
+
+  <div class="game-body">
+    <!-- Left panel -->
+    <div class="scenario-panel">
+      <div class="scenario-header">
+        <h3>YOUR SCENARIO</h3>
+        <div class="scenario-box">
+          <div class="scenario-emoji" id="s-emoji">🛒</div>
+          <div class="scenario-desc" id="s-desc">Loading...</div>
+        </div>
+      </div>
+      <div class="objective-section">
+        <h3>BUILD THE JOURNEY</h3>
+        <div id="objectives-list"></div>
+      </div>
+      <div class="hint-box" id="hint-box">
+        <strong>💡 Hint:</strong> <span id="hint-text">Think about what the customer needs first.</span>
+      </div>
+    </div>
+
+    <!-- Centre -->
+    <div class="dropzone-panel">
+      <div class="progress-track" style="width:100%;max-width:640px;">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="dropzone-title">DRAG TOUCHPOINTS INTO THE CORRECT ORDER</div>
+      <div class="feedback-bar" id="feedback-bar"></div>
+      <div class="journey-lane" id="journey-lane"></div>
+      <div class="submit-row">
+        <button class="btn-check" id="check-btn" onclick="checkAnswer()" disabled>Check Journey ✓</button>
+        <span class="tries-label" id="tries-label">3 attempts left</span>
+      </div>
+    </div>
+
+    <!-- Right panel: card tray -->
+    <div class="tray-panel">
+      <div class="tray-title">TOUCHPOINT CARDS</div>
+      <div class="tray-title" style="font-size:10px;color:rgba(240,244,255,0.3);font-weight:400;margin-top:-8px;margin-bottom:14px;">Drag to the journey →</div>
+      <div id="card-tray"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: RESULTS ══ -->
+<div id="result-screen" class="screen">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark">VF</div>
+      <div>
+        <div class="logo-name">ValueFirst</div>
+        <div class="logo-tag">Your results are in!</div>
+      </div>
+    </div>
+    <span class="whatsapp-badge">💬 Infinito Platform</span>
+  </div>
+  <div class="result-card">
+    <div class="result-glow"></div>
+    <div class="result-trophy" id="result-trophy">🏆</div>
+    <h2 class="result-title" id="result-title">You're a <em>Journey Pro!</em></h2>
+    <p class="result-sub" id="result-sub">You nailed all 3 customer scenarios. This is exactly what ValueFirst's Infinito platform lets you do — visually build and automate WhatsApp journeys in minutes.</p>
+    <div class="result-score-row">
+      <div class="result-stat">
+        <div class="rs-val" id="r-score">0</div>
+        <div class="rs-label">FINAL SCORE</div>
+      </div>
+      <div class="result-stat">
+        <div class="rs-val" id="r-time">0s</div>
+        <div class="rs-label">TIME SAVED</div>
+      </div>
+      <div class="result-stat">
+        <div class="rs-val" id="r-accuracy">0%</div>
+        <div class="rs-label">ACCURACY</div>
+      </div>
+    </div>
+    <div class="hamper-callout">
+      <div class="hamper-icon">🎁</div>
+      <div class="hamper-text">
+        <h4>Claim your hamper!</h4>
+        <p>Show this screen to our booth team to collect your prize. Don't forget to scan our QR for a free Infinito demo slot.</p>
+      </div>
+    </div>
+    <div class="result-learning">
+      <h4>WHAT YOU JUST BUILT</h4>
+      <div class="learning-item">A <strong>WhatsApp Broadcast</strong> re-engages the customer the moment they drop off — open rates 5× better than email.</div>
+      <div class="learning-item">A <strong>Chatbot</strong> answers objections 24/7 — no agent needed, no waiting, instant conversion.</div>
+      <div class="learning-item">An inline <strong>Payment link</strong> removes friction — the customer never leaves WhatsApp to complete purchase.</div>
+      <div class="learning-item">An automated <strong>Confirmation</strong> message builds trust and reduces support tickets by up to 30%.</div>
+    </div>
+    <div class="result-cta-row">
+      <button class="btn-primary" onclick="restartGame()">Play Again</button>
+      <button class="btn-secondary" onclick="alert('Book a demo at the booth or scan the QR code!')">Book a Demo →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+
+const ALL_CARDS = {
+  broadcast: { id:'broadcast', icon:'📢', name:'WhatsApp Broadcast', desc:'Send personalised bulk message to segment', tag:'REACH' },
+  chatbot:   { id:'chatbot',   icon:'🤖', name:'AI Chatbot',         desc:'Answer queries, qualify intent 24/7',    tag:'ENGAGE' },
+  payment:   { id:'payment',   icon:'💳', name:'Payment Link',       desc:'Collect payment inside WhatsApp',        tag:'CONVERT' },
+  confirm:   { id:'confirm',   icon:'✅', name:'Confirmation Msg',   desc:'Order/booking confirmation + tracking',  tag:'RETAIN' },
+  reminder:  { id:'reminder',  icon:'⏰', name:'Reminder Message',   desc:'Nudge at the right moment',              tag:'NURTURE' },
+  feedback:  { id:'feedback',  icon:'⭐', name:'Feedback Request',   desc:'CSAT / review collection post-event',    tag:'DELIGHT' },
+  agent:     { id:'agent',     icon:'👤', name:'Live Agent Handoff', desc:'Escalate complex issues to a human',     tag:'SUPPORT' },
+  catalog:   { id:'catalog',   icon:'🛍️', name:'Product Catalog',    desc:'Share clickable product carousel',       tag:'DISCOVER' },
+  otp:       { id:'otp',       icon:'🔐', name:'OTP / Verification', desc:'Secure login or transaction auth',       tag:'VERIFY' },
+  upsell:    { id:'upsell',    icon:'🚀', name:'Upsell Message',     desc:'Cross-sell or upgrade offer post-purchase', tag:'GROW' },
+};
+
+const SCENARIOS = [
+  {
+    id: 1,
+    emoji: '🛒',
+    title: 'Abandoned Cart Recovery',
+    desc: 'You\'re an <strong>e-commerce brand</strong>. A customer added ₹4,500 worth of sneakers to their cart and left without paying. Recover the sale on WhatsApp.',
+    hint: 'Start by reaching out, then handle objections, remove payment friction, and confirm.',
+    correctOrder: ['broadcast','chatbot','payment','confirm'],
+    distractors: ['reminder','catalog','otp'],
+    objectives: [
+      { step: 1, text: 'Re-engage the customer with a cart reminder' },
+      { step: 2, text: 'Let a chatbot handle questions & objections' },
+      { step: 3, text: 'Offer a frictionless payment link in-chat' },
+      { step: 4, text: 'Send instant order confirmation' },
+    ],
+    learning: [
+      'Broadcast recovers 15–25% of abandoned carts vs 3% for email.',
+      'Chatbot qualifies intent so only ready buyers reach checkout.',
+      'In-chat payment removes the #1 dropout point: "I\'ll pay later."',
+      'Instant confirmation reduces post-purchase anxiety and chargebacks.',
+    ],
+    wrongFeedback: 'Not quite! Think about the customer\'s mindset — they abandoned the cart, so you need to remind them before anything else.',
+    correctFeedback: '🎉 Perfect journey! Broadcast → Chatbot → Payment → Confirmation is the proven ValueFirst recipe for cart recovery.'
+  },
+  {
+    id: 2,
+    emoji: '🏨',
+    title: 'Hotel Booking Re-engagement',
+    desc: 'You\'re a <strong>travel company</strong>. A user searched for Goa hotels, got a quote, but hasn\'t booked for 48 hours. Bring them back and close the booking.',
+    hint: 'Show them what they\'re missing, let them explore, then confirm with verification.',
+    correctOrder: ['reminder','catalog','payment','otp'],
+    distractors: ['broadcast','chatbot','feedback','confirm'],
+    objectives: [
+      { step: 1, text: 'Send a timely re-engagement reminder' },
+      { step: 2, text: 'Share an interactive hotel catalog' },
+      { step: 3, text: 'Offer instant payment to secure the booking' },
+      { step: 4, text: 'Verify identity with an OTP for security' },
+    ],
+    learning: [
+      'A well-timed reminder (48h window) catches 60% of "thinking about it" users.',
+      'Catalog messages let users browse rooms without leaving WhatsApp.',
+      'Payment at point of decision cuts drop-off by up to 40%.',
+      'OTP adds trust and reduces fraudulent bookings significantly.',
+    ],
+    wrongFeedback: 'Not the right sequence. For a travel scenario, remind them of the opportunity first, then show the product catalog.',
+    correctFeedback: '✈️ Spot on! Reminder → Catalog → Payment → OTP is the winning travel journey!'
+  },
+  {
+    id: 3,
+    emoji: '🏥',
+    title: 'Healthcare Appointment + Follow-up',
+    desc: 'You run a <strong>healthcare app</strong>. A patient booked an online consult, attended it, but hasn\'t rated or rebooked. Build a journey to retain and delight them.',
+    hint: 'After a consult, the next step is support, not selling. Then collect feedback, then grow.',
+    correctOrder: ['confirm','agent','feedback','upsell'],
+    distractors: ['broadcast','chatbot','payment','reminder'],
+    objectives: [
+      { step: 1, text: 'Send post-consult confirmation & prescription' },
+      { step: 2, text: 'Offer live agent for follow-up questions' },
+      { step: 3, text: 'Collect feedback and CSAT rating' },
+      { step: 4, text: 'Upsell a health package or follow-up plan' },
+    ],
+    learning: [
+      'Post-consult confirmations with prescriptions reduce no-show rates by 35%.',
+      'Live agent access post-consultation increases patient trust 3×.',
+      'CSAT collected via WhatsApp has 70% higher response rates than email.',
+      'Upselling to satisfied patients is 5× cheaper than acquiring new ones.',
+    ],
+    wrongFeedback: 'Think about patient trust first. After a consult, patients need reassurance before you ask for a rating or upsell.',
+    correctFeedback: '🩺 Excellent care journey! Confirm → Agent → Feedback → Upsell shows you truly understand patient lifecycle!'
+  }
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  playerName: '',
+  score: 0,
+  currentScenario: 0,
+  slots: [],            // what's placed in each slot
+  timerInterval: null,
+  timeLeft: 45,
+  tries: 3,
+  totalCorrectFirst: 0,
+  totalTime: 0,
+  scenarioStartTime: 0,
+  completedScenarios: 0,
+};
+
+// ═══════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ═══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  LEAD FORM
+// ═══════════════════════════════════════════
+function submitLead() {
+  let valid = true;
+  const fields = [
+    { id:'f-fname', err:'err-fname', check: v => v.trim().length > 0 },
+    { id:'f-lname', err:'err-lname', check: v => v.trim().length > 0 },
+    { id:'f-email', err:'err-email', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id:'f-phone', err:'err-phone', check: v => v.trim().length > 6 },
+    { id:'f-company', err:'err-company', check: v => v.trim().length > 0 },
+    { id:'f-industry', err:'err-industry', check: v => v !== '' },
+  ];
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    const err = document.getElementById(f.err);
+    if (!f.check(el.value)) { err.style.display = 'block'; valid = false; }
+    else err.style.display = 'none';
+  });
+  const consent = document.getElementById('f-consent');
+  const consentErr = document.getElementById('err-consent');
+  if (!consent.checked) { consentErr.style.display = 'block'; valid = false; }
+  else consentErr.style.display = 'none';
+
+  if (!valid) return;
+
+  state.playerName = document.getElementById('f-fname').value.trim();
+  document.getElementById('player-name-tag').textContent = state.playerName + ' · Good luck!';
+
+  // Log lead data (would POST to backend in production)
+  const lead = {
+    name: state.playerName + ' ' + document.getElementById('f-lname').value,
+    email: document.getElementById('f-email').value,
+    phone: document.getElementById('f-phone').value,
+    company: document.getElementById('f-company').value,
+    industry: document.getElementById('f-industry').value,
+    current_tool: document.getElementById('f-current').value,
+    timestamp: new Date().toISOString(),
+  };
+  console.log('[ValueFirst Lead]', JSON.stringify(lead, null, 2));
+  // In production: fetch('/api/leads', {method:'POST', body: JSON.stringify(lead)})
+
+  startGame();
+}
+
+// ═══════════════════════════════════════════
+//  GAME ENGINE
+// ═══════════════════════════════════════════
+function startGame() {
+  state.currentScenario = 0;
+  state.score = 0;
+  state.totalCorrectFirst = 0;
+  state.totalTime = 0;
+  state.completedScenarios = 0;
+  showScreen('game-screen');
+  loadScenario(0);
+}
+
+function loadScenario(idx) {
+  const sc = SCENARIOS[idx];
+  state.slots = new Array(sc.correctOrder.length).fill(null);
+  state.tries = 3;
+  state.timeLeft = 45;
+  state.scenarioStartTime = Date.now();
+
+  // Header
+  document.getElementById('scenario-num-display').textContent = (idx+1) + '/' + SCENARIOS.length;
+  document.getElementById('score-display').textContent = state.score;
+
+  // Scenario dots
+  const dotsEl = document.getElementById('scenario-dots');
+  dotsEl.innerHTML = '';
+  SCENARIOS.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'snav-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+    dotsEl.appendChild(d);
+  });
+
+  // Progress bar
+  document.getElementById('progress-fill').style.width = (idx / SCENARIOS.length * 100) + '%';
+
+  // Left panel
+  document.getElementById('s-emoji').textContent = sc.emoji;
+  document.getElementById('s-desc').innerHTML = sc.desc;
+  document.getElementById('hint-text').textContent = sc.hint;
+
+  // Objectives
+  const objEl = document.getElementById('objectives-list');
+  objEl.innerHTML = '';
+  sc.objectives.forEach((o, i) => {
+    const d = document.createElement('div');
+    d.className = 'objective-item';
+    d.id = 'obj-' + i;
+    d.innerHTML = `<div class="obj-num">${i+1}</div><span>${o.text}</span>`;
+    objEl.appendChild(d);
+  });
+
+  // Drop slots
+  const lane = document.getElementById('journey-lane');
+  lane.innerHTML = '';
+  sc.correctOrder.forEach((_, i) => {
+    if (i > 0) {
+      const arr = document.createElement('div');
+      arr.className = 'arrow-connector';
+      arr.id = 'arrow-' + i;
+      arr.textContent = '→';
+      lane.appendChild(arr);
+    }
+    const slot = document.createElement('div');
+    slot.className = 'drop-slot';
+    slot.id = 'slot-' + i;
+    slot.dataset.index = i;
+    slot.innerHTML = `
+      <div class="slot-num">STEP ${i+1}</div>
+      <div class="slot-placeholder">＋</div>
+      <div class="slot-hint">Drop a card here</div>`;
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('over'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('over'));
+    slot.addEventListener('drop', e => { e.preventDefault(); slot.classList.remove('over'); handleDrop(e, i); });
+    lane.appendChild(slot);
+  });
+
+  // Card tray
+  const tray = document.getElementById('card-tray');
+  tray.innerHTML = '';
+  const cardIds = [...sc.correctOrder, ...sc.distractors].sort(() => Math.random() - 0.5);
+  cardIds.forEach(cid => {
+    const c = ALL_CARDS[cid];
+    const el = document.createElement('div');
+    el.className = 'tray-card';
+    el.id = 'tray-' + cid;
+    el.draggable = true;
+    el.dataset.cardId = cid;
+    el.innerHTML = `<div class="tc-icon">${c.icon}</div><div class="tc-info"><div class="tc-name">${c.name}</div><div class="tc-desc">${c.desc}</div></div>`;
+    el.addEventListener('dragstart', e => { e.dataTransfer.setData('cardId', cid); el.classList.add('dragging'); });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    tray.appendChild(el);
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback-bar');
+  fb.className = 'feedback-bar';
+  fb.textContent = '';
+  document.getElementById('tries-label').textContent = '3 attempts left';
+
+  updateCheckBtn();
+  startTimer();
+}
+
+function handleDrop(e, slotIdx) {
+  const cardId = e.dataTransfer.getData('cardId');
+  if (!cardId) return;
+
+  // If card already placed elsewhere, remove it
+  state.slots = state.slots.map(s => s === cardId ? null : s);
+
+  state.slots[slotIdx] = cardId;
+  renderSlots();
+  updateCheckBtn();
+}
+
+function removeFromSlot(slotIdx) {
+  state.slots[slotIdx] = null;
+  renderSlots();
+  updateCheckBtn();
+}
+
+function renderSlots() {
+  const sc = SCENARIOS[state.currentScenario];
+  sc.correctOrder.forEach((_, i) => {
+    const slot = document.getElementById('slot-' + i);
+    const cardId = state.slots[i];
+    if (cardId) {
+      const c = ALL_CARDS[cardId];
+      slot.classList.add('filled');
+      slot.innerHTML = `
+        <div class="slot-num">STEP ${i+1}</div>
+        <span class="remove-btn" onclick="removeFromSlot(${i})">✕</span>
+        <div class="placed-card">
+          <div class="pc-icon">${c.icon}</div>
+          <div class="pc-name">${c.name}</div>
+          <div class="pc-tag">${c.tag}</div>
+        </div>`;
+    } else {
+      slot.classList.remove('filled');
+      slot.innerHTML = `
+        <div class="slot-num">STEP ${i+1}</div>
+        <div class="slot-placeholder">＋</div>
+        <div class="slot-hint">Drop a card here</div>`;
+    }
+  });
+
+  // Grey out used cards in tray
+  const usedIds = state.slots.filter(Boolean);
+  document.querySelectorAll('.tray-card').forEach(el => {
+    el.classList.toggle('used', usedIds.includes(el.dataset.cardId));
+  });
+}
+
+function updateCheckBtn() {
+  const allFilled = state.slots.every(s => s !== null);
+  document.getElementById('check-btn').disabled = !allFilled || state.tries <= 0;
+}
+
+function checkAnswer() {
+  const sc = SCENARIOS[state.currentScenario];
+  const isCorrect = state.slots.every((s, i) => s === sc.correctOrder[i]);
+  const fb = document.getElementById('feedback-bar');
+
+  if (isCorrect) {
+    // Score: base 100 + time bonus + tries bonus
+    const timeBonus = Math.round(state.timeLeft * 2);
+    const triesBonus = (state.tries - 1) * 30;
+    const firstTry = state.tries === 3;
+    const pts = 100 + timeBonus + triesBonus;
+    state.score += pts;
+    if (firstTry) state.totalCorrectFirst++;
+    state.completedScenarios++;
+    state.totalTime += (45 - state.timeLeft);
+
+    fb.className = 'feedback-bar correct';
+    fb.textContent = sc.correctFeedback + ` +${pts} points!`;
+
+    // Light up objectives
+    sc.objectives.forEach((_, i) => document.getElementById('obj-' + i)?.classList.add('done'));
+    // Light up arrows
+    sc.correctOrder.forEach((_, i) => { if(i>0) document.getElementById('arrow-'+i)?.classList.add('lit'); });
+
+    clearInterval(state.timerInterval);
+    document.getElementById('score-display').textContent = state.score;
+
+    setTimeout(() => {
+      if (state.currentScenario + 1 < SCENARIOS.length) {
+        state.currentScenario++;
+        loadScenario(state.currentScenario);
+      } else {
+        showResults();
+      }
+    }, 2200);
+
+  } else {
+    state.tries--;
+    fb.className = 'feedback-bar wrong';
+    fb.textContent = sc.wrongFeedback + (state.tries > 0 ? ` (${state.tries} attempt${state.tries>1?'s':''} left)` : ' No attempts left — showing correct answer.');
+    document.getElementById('tries-label').textContent = state.tries + ' attempt' + (state.tries!==1?'s':'') + ' left';
+
+    // Shake wrong slots
+    state.slots.forEach((s, i) => {
+      if (s !== sc.correctOrder[i]) {
+        const slot = document.getElementById('slot-' + i);
+        slot.classList.add('wrong');
+        setTimeout(() => slot.classList.remove('wrong'), 400);
+      }
+    });
+
+    if (state.tries <= 0) {
+      clearInterval(state.timerInterval);
+      updateCheckBtn();
+      // Show correct answer
+      setTimeout(() => {
+        state.slots = [...sc.correctOrder];
+        renderSlots();
+        state.completedScenarios++;
+        setTimeout(() => {
+          if (state.currentScenario + 1 < SCENARIOS.length) {
+            state.currentScenario++;
+            loadScenario(state.currentScenario);
+          } else {
+            showResults();
+          }
+        }, 2500);
+      }, 1200);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════
+function startTimer() {
+  clearInterval(state.timerInterval);
+  const totalTime = 45;
+  const circumference = 2 * Math.PI * 22;
+  const arc = document.getElementById('timer-arc');
+  const num = document.getElementById('timer-num');
+
+  state.timerInterval = setInterval(() => {
+    state.timeLeft--;
+    num.textContent = state.timeLeft;
+    arc.setAttribute('stroke-dashoffset', circumference * (1 - state.timeLeft / totalTime));
+
+    if (state.timeLeft <= 10) {
+      arc.setAttribute('stroke', '#ff4d6a');
+      num.style.color = '#ff4d6a';
+    } else {
+      arc.setAttribute('stroke', '#00C566');
+      num.style.color = '#00C566';
+    }
+
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerInterval);
+      // Auto-submit or penalise
+      const fb = document.getElementById('feedback-bar');
+      fb.className = 'feedback-bar wrong';
+      fb.textContent = "⏰ Time's up! Moving to the next step — keep going!";
+      state.completedScenarios++;
+      setTimeout(() => {
+        if (state.currentScenario + 1 < SCENARIOS.length) {
+          state.currentScenario++;
+          loadScenario(state.currentScenario);
+        } else {
+          showResults();
+        }
+      }, 1800);
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════
+function showResults() {
+  clearInterval(state.timerInterval);
+  document.getElementById('progress-fill').style.width = '100%';
+
+  const accuracy = Math.round((state.totalCorrectFirst / SCENARIOS.length) * 100);
+  const avgTime = state.totalTime > 0 ? Math.round(state.totalTime / state.completedScenarios) : 0;
+
+  document.getElementById('r-score').textContent = state.score;
+  document.getElementById('r-time').textContent = (135 - state.totalTime) + 's';
+  document.getElementById('r-accuracy').textContent = accuracy + '%';
+
+  // Adjust copy based on score
+  const trophy = document.getElementById('result-trophy');
+  const title = document.getElementById('result-title');
+  const sub = document.getElementById('result-sub');
+  if (state.score >= 350) {
+    trophy.textContent = '🏆';
+    title.innerHTML = `You\'re a <em>Journey Pro!</em>`;
+    sub.textContent = `Amazing, ${state.playerName}! You nailed customer journeys like a seasoned growth marketer. This is exactly how ValueFirst's Infinito platform works — drag, drop, launch.`;
+  } else if (state.score >= 200) {
+    trophy.textContent = '🥈';
+    title.innerHTML = `Solid <em>Journey Builder!</em>`;
+    sub.textContent = `Nice work, ${state.playerName}! You've got the right instincts. With ValueFirst's Infinito, the platform guides you through the perfect journey every time.`;
+  } else {
+    trophy.textContent = '🎓';
+    title.innerHTML = `You\'re <em>Learning Fast!</em>`;
+    sub.textContent = `Great effort, ${state.playerName}! Customer journey design takes practice — but with ValueFirst's Infinito, the platform does the heavy lifting for you.`;
+  }
+
+  showScreen('result-screen');
+  launchConfetti();
+}
+
+function restartGame() {
+  state.currentScenario = 0;
+  state.score = 0;
+  state.completedScenarios = 0;
+  state.totalCorrectFirst = 0;
+  state.totalTime = 0;
+  showScreen('game-screen');
+  loadScenario(0);
+}
+
+// ═══════════════════════════════════════════
+//  CONFETTI
+// ═══════════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: 8 + Math.random() * 10,
+    h: 4 + Math.random() * 6,
+    r: Math.random() * Math.PI * 2,
+    vy: 3 + Math.random() * 4,
+    vx: (Math.random() - 0.5) * 3,
+    vr: (Math.random() - 0.5) * 0.2,
+    color: ['#00C566','#fff','#00e07a','#25D366','#ffe066','#ff6b6b'][Math.floor(Math.random()*6)]
+  }));
+  let frame = 0;
+  function draw() {
+    if (frame++ > 200) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ValueFirst · Funnel Fixer Arcade</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+
+/* ── TOKENS ── */
+:root{
+  --g:#F26522; --gd:#D9561B; --gg:rgba(242,101,34,0.14);
+  --n0:transparent; --n1:rgba(255, 255, 255, 0.55); --n2:rgba(255, 255, 255, 0.7); --n3:rgba(255, 255, 255, 0.9);
+  --bd:rgba(42, 51, 116, 0.1); --tx:#2A3374; --mu:#64748B;
+  --r:14px; --rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100vh;background:linear-gradient(175deg, #EEF1FF 0%, #F8F6FF 25%, #FFFAF5 55%, #FFF0E4 85%, #FFE4D0 100%);font-family:'Inter',sans-serif;color:var(--tx);overflow-x:hidden;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+/* industry screen needs row layout INSIDE the flex column */
+
+/* ── SHARED HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 26px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);position:sticky;top:0;z-index:200;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:10px;}
+.lm{width:34px;height:34px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#000;}
+.ln{font-weight:700;font-size:16px;}
+.lt{font-size:10px;color:var(--mu);margin-top:1px;}
+.wab{display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:12px;padding:4px 11px;font-size:11px;font-weight:600;color:#25D366;}
+
+/* ── BUTTONS ── */
+.btn-p{display:inline-flex;align-items:center;gap:8px;background:var(--g);color:#000;font-weight:700;font-size:15px;border:none;border-radius:40px;padding:13px 34px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.btn-p:hover{background:#00e07a;transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,197,102,0.35);}
+.btn-s{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--tx);font-weight:600;font-size:14px;border:1px solid var(--bd);border-radius:40px;padding:10px 24px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.btn-s:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);}
+
+#splash {
+    align-items: center; justify-content: center; text-align: center;
+    padding: 20px 24px; position: relative; overflow: hidden;
+    background: linear-gradient(175deg, #EEF1FF 0%, #F8F6FF 25%, #FFFAF5 55%, #FFF0E4 85%, #FFE4D0 100%);
+    min-height: 100vh;
+  }
+  #splash-canvas {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .splash-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 50% 40% at 50% 80%, rgba(242,101,34,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 20%, rgba(42,51,200,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .splash-grid {
+    position: absolute; inset: 0; z-index: 0; opacity: 0.035;
+    background-image: linear-gradient(rgba(42,51,116,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(42,51,116,0.2) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Floating icons */
+  .floating-icons { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .float-icon {
+    position: absolute; font-size: 28px; opacity: 0.25;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  .splash-inner { position: relative; z-index: 5; max-width: 680px; }
+
+  /* Entrance animations */
+  .splash-enter { opacity: 0; transform: translateY(30px); animation: slideUp 0.7s ease forwards; }
+  .splash-enter-1 { animation-delay: 0.1s; }
+  .splash-enter-2 { animation-delay: 0.3s; }
+  .splash-enter-3 { animation-delay: 0.5s; }
+  .splash-enter-4 { animation-delay: 0.7s; }
+  .splash-enter-5 { animation-delay: 0.9s; }
+  .splash-enter-6 { animation-delay: 1.1s; }
+  .splash-enter-7 { animation-delay: 1.3s; }
+  
+  /* ── CHAMPIONS BOARD ── */
+  .champ-board {
+    background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 16px; padding: 14px 24px; width: 100%; max-width: 440px;
+    margin: 20px auto 0; box-shadow: inset 0 2px 10px rgba(255,255,255,0.8), 0 10px 30px rgba(0,0,0,0.03);
+    backdrop-filter: blur(12px);
+  }
+  .champ-header {
+    font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .champ-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.08);
+  }
+  .champ-row:last-child { border-bottom: none; padding-bottom: 4px; }
+  .champ-player { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #1E293B; font-size: 14px; }
+  .champ-score { font-weight: 800; color: var(--g); font-size: 14px; display: flex; align-items: center; gap: 4px; }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .splash-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(242,101,34,0.12); border: 1px solid rgba(242,101,34,0.25);
+    border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600;
+    color: #F26522; letter-spacing: 0.1em; margin-bottom: 20px;
+  }
+  .splash-eyebrow::before { content: '●'; font-size: 8px; animation: pulse-dot 1.5s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .splash-h1 {
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.02em;
+    margin-bottom: 16px; color: #2A3374;
+  }
+  .splash-h1 em { font-style: normal; color: #F26522; text-shadow: 0 0 40px rgba(242,101,34,0.3); }
+  .splash-sub { font-size: 16px; color: #64748B; line-height: 1.6; margin-bottom: 28px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  .prizes-strip {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .prize-card {
+    background: rgba(255,255,255,0.5); border: 1px solid rgba(42,51,116,0.08);
+    border-radius: var(--radius); padding: 14px 18px; display: flex;
+    align-items: center; gap: 10px; min-width: 170px;
+    backdrop-filter: blur(10px); transition: all 0.3s;
+  }
+  .prize-card:hover { background: rgba(255,255,255,0.7); transform: translateY(-3px); border-color: rgba(242,101,34,0.3); }
+  .prize-icon { font-size: 30px; }
+  .prize-label { font-size: 12px; color: #94A3B8; }
+  .prize-val { font-size: 15px; font-weight: 600; color: #2A3374; margin-top: 2px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--g); color: #fff; font-weight: 700; font-size: 16px;
+    border: none; border-radius: 40px; padding: 16px 40px; cursor: pointer;
+    transition: all 0.2s; font-family: 'Inter', sans-serif;
+    box-shadow: 0 0 0 0 rgba(242,101,34,0.4);
+  }
+  .btn-primary:hover { background: #FF7A3D; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(242,101,34,0.3); }
+
+  /* Button glow pulse */
+  .btn-glow { animation: btnPulse 2s ease-in-out infinite; }
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(242,101,34,0.3); }
+    50% { box-shadow: 0 0 40px rgba(242,101,34,0.6), 0 0 80px rgba(242,101,34,0.2); }
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; color: var(--tx); font-weight: 600; font-size: 15px;
+    border: 1px solid var(--bd); border-radius: 40px; padding: 13px 32px;
+    cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); background: rgba(42,51,116,0.04); }
+
+  
+/* ══════════════════════════════════════
+   SCREEN 2 · LEAD FORM
+══════════════════════════════════════ */
+#lead-form-screen{align-items:center;justify-content:center;padding:0;}
+#lead-form-screen .hdr{width:100%;}
+.form-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px 24px;overflow-y:auto;}
+.form-card{background:var(--n1);border:1px solid rgba(255,255,255,0.7);border-radius:28px;padding:0;max-width:900px;width:100%;display:flex;overflow:hidden;backdrop-filter: blur(24px); box-shadow: 0 20px 60px rgba(42, 51, 116, 0.08), 0 0 40px rgba(242,101,34,0.04), inset 0 0 0 1px rgba(255,255,255,0.8);}
+.fs{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--g);margin-bottom:8px;}
+.ft{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;}
+.fsub{font-size:13px;color:var(--mu);margin-bottom:14px;line-height:1.4;}
+.fr{margin-bottom:10px;}
+.fr label{display:block;font-size:12px;font-weight:700;color:var(--mu);margin-bottom:4px;letter-spacing:.05em;}
+.fr input,.fr select{width:100%;background:var(--n2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;font-size:14px;color:var(--tx);font-family:'Inter',sans-serif;transition:border-color .2s,box-shadow .2s;outline:none;}
+.fr input::placeholder{color:rgba(240,244,255,.28);}
+.fr input:focus,.fr select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,197,102,.13);}
+.fr select option{background:#1C2436;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.con-row{display:flex;gap:9px;align-items:flex-start;margin-bottom:22px;}
+.con-row input[type=checkbox]{margin-top:3px;accent-color:var(--g);width:15px;height:15px;flex-shrink:0;}
+.con-row span{font-size:12px;color:var(--mu);line-height:1.6;}
+.con-row a{color:var(--g);text-decoration:none;}
+.ferr{color:#ff6b6b;font-size:11px;margin-top:5px;display:none;}
+
+/* ══════════════════════════════════════
+   SCREEN 3 · INDUSTRY SELECT
+══════════════════════════════════════ */
+#industry-screen{min-height:100vh;}
+/* The inner row layout sits below the sticky header */
+.ind-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
+.ind-main{flex:1;overflow-y:auto;padding:28px 30px;}
+.ind-intro{margin-bottom:24px;}
+.ind-intro h2{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;}
+.ind-intro p{font-size:13px;color:var(--mu);line-height:1.6;}
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:15px;}
+.ind-card{background:var(--n2);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:22px 18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;animation:cardIn .4s both;box-shadow:0 10px 30px rgba(42,51,116,0.05);}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ind-card:hover:not(.locked){border-color:var(--g);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4);}
+.ind-card.locked{opacity:.35;cursor:not-allowed;filter:grayscale(.6);}
+.ind-card.pop{animation:selectPop .35s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes selectPop{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+.ic-emoji{font-size:32px;margin-bottom:10px;display:block;}
+.ic-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.ic-desc{font-size:11px;color:var(--mu);line-height:1.5;}
+.ic-badge{position:absolute;top:9px;right:9px;font-size:9px;font-weight:700;letter-spacing:.07em;background:var(--gg);color:var(--g);border:1px solid rgba(0,197,102,.25);border-radius:7px;padding:3px 7px;}
+.ic-done{position:absolute;top:9px;right:9px;font-size:10px;font-weight:700;background:rgba(0,197,102,.15);color:var(--g);border:1px solid rgba(0,197,102,.3);border-radius:7px;padding:3px 8px;}
+.ic-lock{position:absolute;top:9px;left:9px;font-size:13px;}
+
+/* ── LEADERBOARD SIDEBAR ── */
+.lb-sidebar{width:272px;flex-shrink:0;background:var(--n1);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;}
+.lb-hdr{padding:18px 18px 13px;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.lb-hdr h3{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--g);margin-bottom:2px;}
+.lb-hdr p{font-size:11px;color:var(--mu);}
+.lb-body{flex:1;overflow-y:auto;padding:10px;}
+.lb-row{display:flex;align-items:center;gap:9px;padding:9px 9px;border-radius:9px;margin-bottom:5px;background:rgba(255,255,255,.02);border:1px solid transparent;transition:all .3s;}
+.lb-row.r1{background:rgba(255,215,0,.06);border-color:rgba(255,215,0,.2);}
+.lb-row.r2{background:rgba(192,192,192,.05);border-color:rgba(192,192,192,.15);}
+.lb-row.r3{background:rgba(205,127,50,.05);border-color:rgba(205,127,50,.15);}
+.lb-rank{font-size:13px;font-weight:800;width:22px;text-align:center;flex-shrink:0;}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-co{font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-pts{font-size:13px;font-weight:800;color:var(--g);font-family:'Space Grotesk',sans-serif;flex-shrink:0;}
+.lb-you{font-size:9px;background:var(--g);color:#000;border-radius:4px;padding:1px 5px;font-weight:700;margin-left:4px;vertical-align:middle;}
+.lb-empty{padding:22px 12px;text-align:center;font-size:12px;color:var(--mu);line-height:1.7;}
+
+/* ══════════════════════════════════════
+   SCREEN 4 · GAME
+══════════════════════════════════════ */
+#game-screen{min-height:100vh;}
+.g-body{display:flex;flex:1;overflow:hidden;min-height:calc(100vh - 60px);}
+
+/* score strip in header */
+.score-strip{display:flex;gap:16px;align-items:center;}
+.ss-item .sv{font-size:19px;font-weight:800;color:var(--g);font-family:'Space Grotesk',sans-serif;line-height:1;}
+.ss-item .sl{font-size:9px;color:var(--mu);letter-spacing:.07em;font-weight:700;}
+.pip-row{display:flex;gap:5px;align-items:center;}
+.pip{width:30px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);transition:all .4s;}
+.pip.ok{background:var(--g);}
+.pip.bad{background:#ff4d6a;}
+.pip.cur{background:#fff;width:44px;}
+.timer-w{position:relative;width:48px;height:48px;flex-shrink:0;}
+.timer-w svg{position:absolute;top:0;left:0;transform:rotate(-90deg);}
+.timer-n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--g);font-family:'Space Grotesk',sans-serif;}
+
+/* LEFT: scenario panel */
+.sc-panel{width:285px;flex-shrink:0;background:var(--n1);border-right:1px solid var(--bd);padding:22px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.sc-panel .ph{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:var(--g);letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sc-panel .ph::before{content:'';display:block;width:8px;height:8px;background:var(--g);border-radius:50%;box-shadow:0 0 10px rgba(242,101,34,0.8);}
+.sc-box{background:white;border:1px solid #E2E8F0;border-radius:12px;padding:16px;box-shadow:0 4px 6px rgba(0,0,0,.02);}
+.sc-emo{font-size:26px;margin-bottom:8px;}
+.sc-desc{font-size:13px;line-height:1.7;color:#0F172A;font-weight:500;}
+.sc-desc strong{color:var(--g);}
+.obj-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:8px;font-size:12px;box-shadow:0 2px 4px rgba(0,0,0,.02);color:#475569;font-weight:500;}
+.obj-item.ok{background:rgba(0,197,102,.07);border-color:rgba(0,197,102,.25);color:var(--tx);}
+.onum{width:19px;height:19px;border-radius:50%;border:1.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;transition:all .3s;}
+.obj-item.ok .onum{background:var(--g);border-color:var(--g);color:#000;}
+.hint-box{background:#0F172A;border:1px solid #334155;border-radius:8px;padding:14px;font-size:12px;color:#38BDF8;margin-top:14px;box-shadow:inset 0 2px 8px rgba(0,0,0,.3);font-weight:600;line-height:1.5;}
+.hint-box strong{color:var(--g);}
+
+/* CENTRE: drop zone */
+.dz-panel{flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 18px;overflow-y:auto;}
+.dz-title{font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.1em;margin-bottom:18px;}
+.prog-track{width:100%;max-width:620px;height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:18px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--g);border-radius:2px;transition:width .5s;}
+.fb-bar{width:100%;max-width:620px;border-radius:8px;padding:12px 15px;font-size:13px;font-weight:600;line-height:1.5;margin-bottom:14px;display:none;}
+.fb-bar.ok{background:rgba(0,197,102,.1);border:1px solid rgba(0,197,102,.3);color:#00e07a;display:block;}
+.fb-bar.bad{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:#ff8096;display:block;}
+.journey-lane{display:flex;align-items:center;width:100%;max-width:100%;margin-bottom:22px;flex-wrap:nowrap;justify-content:center;gap:0;}
+
+.dslot{width:120px;min-height:110px;border:2px dashed #CBD5E1;border-radius:12px;background:#F8FAFC;box-shadow:inset 0 4px 6px rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s cubic-bezier(0.4, 0, 0.2, 1);position:relative;margin:4px 0;z-index:3;}
+.slot-arrow{font-size:24px;color:#CBD5E1;font-weight:900;margin:0 10px;z-index:2;}
+.dslot.over{border-color:#00C566;background:#ECFDF5;transform:scale(1.05);box-shadow:0 0 20px rgba(0,197,102,.3);}
+.dslot.filled{border-color:#00C566;border-style:solid;background:white;box-shadow:0 4px 12px rgba(0,0,0,.05);}
+.snum{position:absolute;top:6px;left:8px;font-size:10px;font-weight:800;color:#94A3B8;letter-spacing:.05em;}
+.sph{font-size:24px;margin-bottom:2px;color:#CBD5E1;}
+.shi{font-size:10px;color:#94A3B8;text-align:center;}
+.pc{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;}
+.pc-ico{font-size:22px;margin-bottom:3px;}
+.pc-nm{font-size:10px;font-weight:700;color:var(--tx);text-align:center;line-height:1.3;}
+.pc-tg{font-size:8px;color:var(--g);font-weight:700;margin-top:2px;letter-spacing:.05em;}
+.rm-btn{position:absolute;top:4px;right:6px;font-size:12px;cursor:pointer;color:rgba(255,255,255,.25);transition:color .2s;line-height:1;background:none;border:none;}
+.rm-btn:hover{color:#ff6b6b;}
+.arr{font-size:17px;color:rgba(255,255,255,.18);flex-shrink:0;margin:0 2px;display:flex;align-items:center;transition:color .4s;}
+.arr.lit{color:var(--g);}
+
+.sub-row{display:flex;gap:12px;align-items:center;margin-top:4px;}
+.btn-chk{background:var(--g);color:#000;border:none;border-radius:30px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.btn-chk:hover{background:#00e07a;}
+.btn-chk:disabled{background:rgba(0,197,102,.25);color:rgba(0,0,0,.4);cursor:not-allowed;}
+.tl{font-size:11px;color:var(--mu);}
+
+/* RIGHT: card tray */
+.tray-panel{width:225px;flex-shrink:0;background:var(--n1);border-left:1px solid var(--bd);padding:18px 14px;overflow-y:auto;}
+.tray-ttl{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#475569;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px;}
+.tray-sub{font-size:11px;color:#94A3B8;margin-bottom:16px;font-style:italic;}
+.tc{background:white;border:1px solid #E2E8F0;border-radius:12px;padding:12px;margin-bottom:12px;cursor:grab;transition:all .2s cubic-bezier(0.4, 0, 0.2, 1);user-select:none;display:flex;align-items:center;gap:12px;box-shadow:0 4px 6px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.08);position:relative;overflow:hidden;}
+.tc:hover{border-color:#CBD5E1;transform:translateY(-4px) scale(1.02);box-shadow:0 12px 20px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.04);}
+.tc:active{cursor:grabbing;}
+.tc.dragging{opacity:.4;transform:scale(0.95);}
+.tc.used{opacity:.2;pointer-events:none;}
+.tc-ico{font-size:28px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.1));}
+.tc-nm{font-size:12px;font-weight:700;margin-bottom:1px;}
+.tc-ds{font-size:10px;color:var(--mu);line-height:1.4;}
+
+/* ══════════════════════════════════════
+   REVEAL OVERLAY
+══════════════════════════════════════ */
+.reveal-ov{position:fixed;inset:0;background:rgba(5,10,25,.8);z-index:400;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);animation:fadeIn .25s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.reveal-box{background:#ffffff;border:1px solid #E2E8F0;border-radius:28px;padding:34px 38px;max-width:480px;width:90%;text-align:center;box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation:slideUp .32s cubic-bezier(.175,.885,.32,1.275);max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
+.reveal-box h3{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:8px;}
+.reveal-box h3.ok{color:var(--g);}
+.reveal-box h3.bad{color:#ff6b6b;}
+.rev-steps{display:flex;gap:7px;align-items:center;justify-content:center;flex-wrap:wrap;margin:16px 0;}
+.rev-step{background:#F8FAFC;border:1px solid rgba(0,197,102,.3);border-radius:10px;padding:9px 11px;text-align:center;min-width:82px;box-shadow:0 4px 6px rgba(0,0,0,0.05);}
+.rev-step .ri{font-size:21px;margin-bottom:3px;}
+.rev-step .rn{font-size:10px;font-weight:700;}
+.rev-arr{color:var(--g);font-size:15px;}
+.rev-explain{font-size:12px;color:var(--mu);line-height:1.7;margin-bottom:20px;text-align:left;}
+
+/* ══════════════════════════════════════
+   SCREEN 5 · RESULTS
+══════════════════════════════════════ */
+#result-screen{min-height:100vh;}
+.res-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 24px;overflow-y:auto;}
+.res-card{background:var(--n1);border:1px solid rgba(255,255,255,0.7);border-radius:28px;padding:40px 42px;max-width:580px;width:100%;backdrop-filter: blur(24px); box-shadow: 0 20px 60px rgba(42, 51, 116, 0.08), 0 0 40px rgba(242,101,34,0.04), inset 0 0 0 1px rgba(255,255,255,0.8); position:relative;overflow:hidden;text-align:center;}
+.res-glow{position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,197,102,.18) 0%,transparent 70%);pointer-events:none;}
+.res-trophy{font-size:58px;margin-bottom:12px;animation:bounceIn .55s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes bounceIn{0%{transform:scale(0)}70%{transform:scale(1.14)}100%{transform:scale(1)}}
+.res-title{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;margin-bottom:7px;}
+.res-title em{font-style:normal;color:var(--g);}
+.res-sub{font-size:14px;color:var(--mu);margin-bottom:26px;line-height:1.7;}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:24px;}
+.rstat{background:var(--n2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 10px;}
+.rstat-v{font-size:24px;font-weight:800;color:var(--g);font-family:'Space Grotesk',sans-serif;}
+.rstat-l{font-size:10px;color:var(--mu);margin-top:3px;font-weight:700;letter-spacing:.05em;}
+.hamper{background:linear-gradient(135deg,rgba(0,197,102,.1) 0%,rgba(0,80,40,.06) 100%);border:1px solid rgba(0,197,102,.28);border-radius:var(--r);padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:13px;text-align:left;}
+.hamper h4{font-size:14px;font-weight:700;color:var(--g);margin-bottom:3px;}
+.hamper p{font-size:12px;color:var(--mu);line-height:1.5;}
+.mini-lb{background:var(--n2);border:1px solid var(--bd);border-radius:var(--r);padding:15px;margin-bottom:20px;text-align:left;}
+.mini-lb h4{font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.08em;margin-bottom:11px;}
+.mlb-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;}
+.mlb-row:last-child{border-bottom:none;}
+.mlb-row.hl{color:var(--g);font-weight:700;}
+.res-learn{text-align:left;background:var(--n2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:22px;}
+.res-learn h4{font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.08em;margin-bottom:11px;}
+.litem{display:flex;gap:8px;font-size:12px;line-height:1.6;margin-bottom:7px;}
+.litem::before{content:'→';color:var(--g);font-weight:700;flex-shrink:0;}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* confetti */
+#confetti-cv{position:fixed;inset:0;pointer-events:none;z-index:999;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .g-body{flex-direction:column;}
+  .sc-panel{width:100%;border-right:none;border-bottom:1px solid var(--bd);}
+  .tray-panel{width:100%;border-left:none;border-top:1px solid var(--bd);}
+  .ind-layout{flex-direction:column;}
+  .lb-sidebar{width:100%;border-left:none;border-top:1px solid var(--bd);max-height:280px;}
+  .fgrid{grid-template-columns:1fr;}
+  .res-stats{grid-template-columns:1fr 1fr;}
+}
+
+
+  /* ── TUTORIAL OVERLAY ── */
+  #tutorial-overlay {
+    position: fixed; inset: 0; z-index: 1000; display: none; pointer-events: none;
+  }
+  .tutorial-hole {
+    position: absolute; border: 3px solid var(--g);
+    border-radius: var(--r); box-shadow: 0 0 0 9999px rgba(17,22,51,0.75);
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: auto;
+  }
+  .tutorial-tooltip {
+    position: absolute; background: #fff; padding: 20px;
+    border-radius: var(--r); max-width: 320px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 1001;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: auto;
+  }
+  .tutorial-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--tx); margin-bottom: 8px; }
+  .tutorial-desc { font-size: 13px; color: var(--mu); line-height: 1.5; margin-bottom: 16px; }
+  .tutorial-btn {
+    background: var(--g); color: #fff; border: none; border-radius: 20px;
+    padding: 8px 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .tutorial-btn:hover { background: var(--gd); }
+  .arcade-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    padding: 36px 44px;
+    box-shadow: 0 20px 60px rgba(42, 51, 116, 0.08), 0 0 40px rgba(242,101,34,0.04), inset 0 0 0 1px rgba(255,255,255,0.8);
+    max-width: 780px;
+    margin: 10px auto;
+    position: relative;
+    z-index: 10;
+  }
+
+
+  
+  .avatar-col {
+    width: 42%; background: #ffffff; padding: 40px 30px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-right: 1px solid rgba(0,0,0,0.08); position: relative;
+  }
+  .form-col {
+    width: 58%; padding: 24px 32px; position: relative;
+  }
+  @keyframes glowPulse {
+    0% { text-shadow: 0 0 5px rgba(242,101,34,0); }
+    50% { text-shadow: 0 0 20px rgba(242,101,34,0.6); color: var(--g); }
+    100% { text-shadow: 0 0 5px rgba(242,101,34,0); }
+  }
+  .avatar-header {
+    font-weight: 800; font-size: 22px; color: #1E293B; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 24px; text-align: center; width: 100%;
+    animation: glowPulse 3s infinite;
+  }
+  .avatar-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 320px;
+  }
+  .avatar-item {
+    background: #f8fafc; border: 2px solid transparent; border-radius: 12px; padding: 10px 6px;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative;
+  }
+  .avatar-item:hover {
+    transform: translateY(-4px) scale(1.05); box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+  }
+  .avatar-item.selected {
+    border-color: var(--g); background: rgba(0,197,102,0.05);
+    transform: scale(1.05); box-shadow: 0 0 0 2px var(--g), 0 10px 20px rgba(242,101,34,0.1);
+  }
+  .avatar-item.selected::after {
+    content: '✓'; position: absolute; top: -8px; right: -8px; background: var(--g); color: white;
+    width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: bold; border: 2px solid white;
+  }
+  .av-img-thumb {
+    width: 100%; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; margin-bottom: 8px; pointer-events: none;
+  }
+  .av-name {
+    font-size: 10px; font-weight: 700; color: #475569; text-align: center; line-height: 1.2; pointer-events: none;
+  }
+  @media(max-width: 800px) {
+    .form-card { flex-direction: column; }
+    .avatar-col { width: 100%; height: 250px; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .form-col { width: 100%; padding: 24px 20px; }
+  }
+
+  /* ── FORM ANIMATIONS & GAMIFICATION ── */
+  .form-progress-bar {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+    border-radius: 6px; margin-bottom: 16px; overflow: hidden;
+    position: relative;
+  }
+  .form-progress-fill {
+    height: 100%; width: 0%; background: var(--g);
+    border-radius: 6px; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 0 10px var(--g);
+  }
+  .form-row.anim-enter { opacity: 0; transform: translateY(20px); }
+  @keyframes formCascade {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .form-card input:focus, .form-card select:focus {
+    border-color: var(--g);
+    box-shadow: 0 0 15px rgba(242,101,34,0.3), inset 0 0 0 1px var(--g);
+    background: rgba(255,255,255,0.1);
+  }
+  .btn-locked {
+    background: rgba(0,0,0,0.05) !important;
+    color: rgba(0,0,0,0.3) !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .btn-unlock-anim {
+    animation: btnUnlockPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes btnUnlockPop {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.05); box-shadow: 0 0 40px var(--g); }
+    100% { transform: scale(1); box-shadow: 0 0 20px rgba(242,101,34,0.4); }
+  }
+  .fr-locked::after {
+    content: '🔒'; position: absolute; right: 12px; top: 29px;
+    font-size: 14px; opacity: 0.5; transition: all 0.3s; pointer-events: none;
+  }
+  .fr-unlocked::after {
+    content: '🔓'; opacity: 1; color: var(--g); filter: drop-shadow(0 0 5px var(--g));
+  }
+
+
+
+/* ── HOLO MAP ── */
+.map-container {
+  display: flex; flex: 1; position: relative; overflow: hidden;
+  background: #0B0F19 radial-gradient(circle at center, #1E293B 0%, #0B0F19 100%);
+  width: 100%; min-height: 500px;
+}
+.map-grid-bg {
+  position: absolute; inset: 0; opacity: 0.15;
+  background-image: linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+.map-header {
+  position: absolute; top: 40px; left: 50px; z-index: 10;
+  color: white; pointer-events: none;
+}
+.map-header h2 { font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
+.map-header p { font-size: 15px; color: #94A3B8; }
+
+.map-node {
+  position: absolute; width: 64px; height: 64px;
+  background: rgba(15,23,42,0.9); border: 2px solid var(--g); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; z-index: 5;
+  box-shadow: 0 0 20px rgba(242,101,34,0.5), inset 0 0 10px rgba(242,101,34,0.3);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translate(-50%, -50%); /* Center on coordinate */
+}
+.map-node:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 35px rgba(242,101,34,0.8), inset 0 0 15px rgba(242,101,34,0.6);
+  z-index: 20;
+}
+.map-node.locked {
+  border-color: #334155; box-shadow: 0 0 10px rgba(0,0,0,0.5); background: #0F172A; opacity: 0.6; pointer-events: none;
+}
+.map-node.locked::after {
+  content: '🔒'; position: absolute; font-size: 16px; bottom: -8px; right: -8px;
+}
+
+.map-svg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+}
+.map-svg line {
+  stroke: rgba(242,101,34,0.4); stroke-width: 2; stroke-dasharray: 6 6;
+  animation: dash 30s linear infinite;
+}
+@keyframes dash { to { stroke-dashoffset: -1000; } }
+
+
+.node-label {
+  position: absolute; top: 76px; left: 50%; transform: translateX(-50%);
+  color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  text-align: center; white-space: nowrap; transition: all 0.3s; pointer-events: none;
+}
+.map-node:hover .node-label, .map-node.active-node .node-label {
+  color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8);
+}
+.map-node.active-node {
+  border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.6), inset 0 0 20px rgba(255,255,255,0.4); z-index: 15;
+}
+
+.map-hud {
+  position: absolute; top: 0; right: 0; width: 380px; height: 100%;
+  background: rgba(11, 15, 25, 0.95); border-left: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px); padding: 40px 40px 60px; display: flex; flex-direction: column;
+  z-index: 30; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.map-hud.open { transform: translateX(0); }
+
+.hud-emoji { font-size: 70px; margin-bottom: 24px; filter: drop-shadow(0 0 30px rgba(242,101,34,0.3)); }
+.hud-title { font-size: 32px; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 16px; }
+.hud-desc { font-size: 16px; color: #94A3B8; line-height: 1.6; margin-bottom: 30px; }
+.hud-btn {
+  width: 100%; padding: 20px; border-radius: 8px; background: var(--g); color: white;
+  font-weight: 800; font-size: 16px; border: none; cursor: pointer; text-align: center; text-transform: uppercase; letter-spacing: 1px;
+  transition: all 0.2s; box-shadow: 0 10px 20px rgba(242,101,34,0.3);
+}
+.hud-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 15px 30px rgba(242,101,34,0.5); }
+.hud-btn.locked { background: #334155; color: #94A3B8; box-shadow: none; pointer-events: none; }
+
+
+.player-profile-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 40px;
+  padding: 4px 12px 4px 4px;
+}
+.chip-avatar {
+  width: 26px; height: 26px; border-radius: 50%; object-fit: cover;
+  background: #E2E8F0;
+}
+.chip-info {
+  display: flex; flex-direction: column;
+}
+.chip-name {
+  font-size: 12px; font-weight: 700; color: #0F172A; line-height: 1; margin-bottom: 2px;
+}
+.chip-role {
+  font-size: 9px; font-weight: 600; color: var(--g); line-height: 1; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="confetti-cv"></canvas>
+
+<!-- ══ SPLASH ══ -->
+<div id="splash" class="screen active">
+  <canvas id="splash-canvas"></canvas>
+  <div class="splash-bg"></div>
+  <div class="splash-grid"></div>
+
+  <!-- Floating game-themed icons -->
+  <div class="floating-icons" id="floating-icons"></div>
+
+  <div class="splash-inner arcade-card">
+    
+    <div class="splash-enter splash-enter-1" style="margin-bottom: 20px;">
+      <img src="/logo.png" style="height: 46px; object-fit: contain;" />
+    </div>
+
+    <div class="splash-enter splash-enter-2">
+      <div class="splash-eyebrow">DRAG · DROP · DOMINATE</div>
+    </div>
+    <h1 class="splash-h1 splash-enter splash-enter-3">The Funnel Fixer<br><em>Arcade</em></h1>
+    <p class="splash-sub splash-enter splash-enter-4">
+      Master the customer journey. Drag & drop WhatsApp touchpoints to solve real business challenges, beat the clock, and top the leaderboard.
+    </p>
+    
+    <div class="prizes-strip splash-enter splash-enter-5">
+      <div class="prize-card">
+        <div class="prize-icon">🎁</div>
+        <div>
+          <div class="prize-label">Prize</div>
+          <div class="prize-val">Win a hamper</div>
+        </div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">⏱️</div>
+        <div>
+          <div class="prize-label">Time</div>
+          <div class="prize-val">45 Seconds</div>
+        </div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">🧠</div>
+        <div>
+          <div class="prize-label">Challenges</div>
+          <div class="prize-val">1 Scenario</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="champ-board splash-enter splash-enter-6">
+      <div class="champ-header">👑 TOP 3 CHAMPIONS</div>
+      <div id="splash-lb-rows"></div>
+    </div>
+
+    <div class="splash-enter splash-enter-7" style="margin-top: 24px;">
+      <button class="btn-primary btn-glow" style="font-size: 18px; padding: 16px 44px; border-radius: 50px;" onclick="showScreen('lead-form-screen')">ENTER THE ARCADE →</button>
+      <p style="font-size:12px; color: #94A3B8; margin-top:14px; font-weight:500;">Quick registration · 30 seconds · Win prizes</p>
+    </div>
+  </div>
+</div>
+<!-- ══ LEAD FORM ══ -->
+<div id="lead-form-screen" class="screen">
+  <div class="hdr">
+    <div class="logo"><img src="/logo.png" style="height: 36px; object-fit: contain;" /></div>
+    <button class="btn-s" onclick="showScreen('splash')" style="font-size:12px;padding:7px 18px;">← Back</button>
+  </div>
+  <div class="form-wrap">
+    <div class="form-card">
+      
+      <div class="avatar-col">
+        <div class="avatar-header">CHOOSE YOUR AVATAR</div>
+        <div class="avatar-grid" id="av-grid"></div>
+      </div>
+      <div class="form-col">
+        <div class="fs">STEP 1 OF 2 · PROFILE CREATION</div>
+      <div class="form-progress-bar"><div class="form-progress-fill" id="form-prog"></div></div>
+      <h2 class="ft">PLAYER REGISTRATION</h2>
+      <p class="fsub">Fill in your details to unlock the game and be eligible for the <strong style="color:var(--g)">hamper giveaway</strong>. No spam — only the good kind of messages 😄</p>
+      <div class="fgrid">
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>FIRST NAME *</label><input id="ff-fn" placeholder="Rahul"/><div class="ferr" id="fe-fn">Required</div></div>
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>LAST NAME *</label><input id="ff-ln" placeholder="Sharma"/><div class="ferr" id="fe-ln">Required</div></div>
+      </div>
+      <div class="fgrid">
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>WORK EMAIL *</label><input type="email" id="ff-em" placeholder="rahul@company.com"/><div class="ferr" id="fe-em">Valid email required</div></div>
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>PHONE *</label><input type="tel" id="ff-ph" placeholder="+91 98765 43210"/><div class="ferr" id="fe-ph">Required</div></div>
+      </div>
+      <div class="fgrid">
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>COMPANY *</label><input id="ff-co" placeholder="Acme Corp"/><div class="ferr" id="fe-co">Required</div></div>
+        <div class="fr fr-locked anim-enter" style="position:relative;"><label>INDUSTRY *</label>
+          <select id="ff-ind">
+            <option value="">Select…</option>
+            <option>E-commerce / Retail</option><option>BFSI / Fintech</option><option>Healthcare</option>
+            <option>EdTech</option><option>Travel &amp; Hospitality</option><option>Logistics</option>
+            <option>Real Estate</option><option>D2C / FMCG</option><option>Automotive</option><option>SaaS / IT</option><option>Other</option>
+          </select>
+          <div class="ferr" id="fe-ind">Required</div>
+        </div>
+      </div>
+      <div class="fr fr-locked anim-enter" style="position:relative;"><label>CURRENT MESSAGING TOOL?</label>
+        <select id="ff-cur">
+          <option value="">Select…</option>
+          <option>Email only</option><option>SMS</option><option>WhatsApp Business App</option>
+          <option>WhatsApp API (via partner)</option><option>In-app push</option><option>Multiple channels</option><option>Nothing yet</option>
+        </select>
+      </div>
+      <div class="con-row anim-enter"><input type="checkbox" id="ff-con"/><span>I agree ValueFirst may contact me about their products. <a href="#">Privacy Policy</a>.</span></div>
+      <div class="ferr" id="fe-con" style="margin-bottom:12px;">Please accept to continue</div>
+      <button class="btn-p btn-locked anim-enter" id="btn-submit-lead" onclick="submitLead()" style="width:100%;justify-content:center;">🔒 Awaiting Data...</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INDUSTRY SELECT ══ -->
+<div id="industry-screen" class="screen">
+  <div class="hdr">
+    <div class="logo"><img src="/logo.png" style="height: 36px; object-fit: contain;" /></div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="player-profile-chip">
+        <img src="" id="player-avatar-1" class="chip-avatar" style="display:none;" />
+        <div class="chip-info">
+          <div class="chip-name" id="player-name-1">Player</div>
+          <div class="chip-role" id="player-role-1">Role</div>
+        </div>
+      </div>
+      <div style="width:1px;height:24px;background:#E2E8F0;"></div>
+      <div style="font-size:12px;color:var(--mu);">Total Score: <strong style="color:var(--g);font-size:16px;" id="total-sc-hdr">0</strong></div>
+      <span class="wab">💬 Infinito Platform</span>
+    </div>
+  </div>
+  <div class="map-container" id="map-container">
+    <div class="map-grid-bg"></div>
+    <svg class="map-svg" id="map-svg"></svg>
+    <div class="map-header">
+      <h2>SECTOR MAP</h2>
+      <p>Select a glowing node to infiltrate the industry.<br><span style="color:var(--g);font-weight:600;">Answer faster = more points!</span></p>
+    </div>
+    <div id="map-nodes-wrap"></div>
+    <div class="map-hud" id="map-hud"></div>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="game-screen" class="screen">
+  <div class="hdr">
+    <div class="logo">
+      <img src="/logo.png" style="height: 36px; object-fit: contain;" />
+      <div style="margin-left:12px; padding-left:12px; border-left:1px solid #E2E8F0; font-weight:700; font-size:14px; color:#475569;" id="g-ind-name">Industry</div>
+    </div>
+    
+    <div class="score-strip">
+      <div class="player-profile-chip" style="margin-right:24px; background:white;">
+        <img src="" id="player-avatar-2" class="chip-avatar" style="display:none;" />
+        <div class="chip-info">
+          <div class="chip-name" id="player-name-2">Player</div>
+          <div class="chip-role" id="player-role-2">Role</div>
+        </div>
+      </div>
+      <div class="ss-item"><div class="sv" id="g-score">0</div><div class="sl">SCORE</div></div>
+      <div class="pip-row" id="g-pips"></div>
+      <div class="timer-w">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+          <circle id="t-arc" cx="24" cy="24" r="20" fill="none" stroke="#00C566" stroke-width="3" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-n" id="t-num">45</div>
+      </div>
+    </div>
+  </div>
+  <div class="g-body">
+    <div class="sc-panel">
+      <div><div class="ph">YOUR SCENARIO</div><div class="sc-box"><div class="sc-emo" id="sc-emo">🛒</div><div class="sc-desc" id="sc-desc">Loading…</div></div></div>
+      <div><div class="ph">BUILD THE JOURNEY</div><div id="obj-list"></div></div>
+      <div class="hint-box"><strong>💡 Hint:</strong> <span id="hint-txt">Think about what the customer needs first.</span></div>
+    </div>
+    <div class="dz-panel">
+      <div class="prog-track" style="width:100%;max-width:620px;"><div class="prog-fill" id="g-prog" style="width:0%"></div></div>
+      <div class="dz-title">DRAG TOUCHPOINTS INTO THE CORRECT ORDER</div>
+      <div class="fb-bar" id="fb-bar"></div>
+      <div class="journey-lane" id="j-lane"></div>
+      <div class="sub-row">
+        <button class="btn-chk" id="chk-btn" onclick="checkAnswer()" disabled>EXECUTE JOURNEY</button>
+        <span class="tl" id="tl-txt">Fill all slots to submit</span>
+      </div>
+    </div>
+    <div class="tray-panel">
+      <div class="tray-ttl">TOUCHPOINT CARDS</div>
+      <div class="tray-sub">Drag a card to a slot →</div>
+      <div id="card-tray"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══ -->
+<div id="result-screen" class="screen">
+  <div class="hdr">
+    <div class="logo"><img src="/logo.png" style="height: 36px; object-fit: contain;" /></div>
+    <span class="wab">💬 Infinito Platform</span>
+  </div>
+  <div class="res-wrap">
+    <div class="res-card">
+      <div class="res-glow"></div>
+      <div class="res-trophy" id="r-trophy">🏆</div>
+      <h2 class="res-title" id="r-title">Round <em>Complete!</em></h2>
+      <p class="res-sub" id="r-sub">Great work!</p>
+      <div class="res-stats">
+        <div class="rstat"><div class="rstat-v" id="r-score">0</div><div class="rstat-l">ROUND SCORE</div></div>
+        <div class="rstat"><div class="rstat-v" id="r-total">0</div><div class="rstat-l">TOTAL SCORE</div></div>
+        <div class="rstat"><div class="rstat-v" id="r-acc">0%</div><div class="rstat-l">ACCURACY</div></div>
+      </div>
+      <div class="hamper"><div style="font-size:36px;flex-shrink:0;">🎁</div><div><h4>Claim your hamper!</h4><p>Show this screen to our booth team. Scan our QR for a free Infinito demo slot.</p></div></div>
+      <div class="mini-lb" id="r-mini-lb"></div>
+      <div class="res-learn" id="r-learn"></div>
+      <div class="cta-row" id="r-cta">
+        <button class="btn-p" onclick="goPickAnotherIndustry()">Play Another Industry →</button>
+        <button class="btn-s" onclick="showScreen('splash')">Back to Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+// ═══════════════════════════════════════════
+// DATABASE CONFIG
+// ═══════════════════════════════════════════
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxlyqayXXHMNK_jG_NL4rFpZZ9W-NLw42gSAKpe8rdM2bwsxnHhd30WJpwwOEr6JgXy/exec';
+
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+
+const ALL_CARDS = {
+  broadcast: { id:'broadcast', icon:'📢', name:'WhatsApp Broadcast', desc:'Send personalised bulk message to segment', tag:'REACH' },
+  chatbot:   { id:'chatbot',   icon:'🤖', name:'AI Chatbot',         desc:'Answer queries, qualify intent 24/7',    tag:'ENGAGE' },
+  payment:   { id:'payment',   icon:'💳', name:'Payment Link',       desc:'Collect payment inside WhatsApp',        tag:'CONVERT' },
+  confirm:   { id:'confirm',   icon:'✅', name:'Confirmation Msg',   desc:'Order/booking confirmation + tracking',  tag:'RETAIN' },
+  reminder:  { id:'reminder',  icon:'⏰', name:'Reminder Message',   desc:'Nudge at the right moment',              tag:'NURTURE' },
+  feedback:  { id:'feedback',  icon:'⭐', name:'Feedback Request',   desc:'CSAT / review collection post-event',    tag:'DELIGHT' },
+  agent:     { id:'agent',     icon:'👤', name:'Live Agent Handoff', desc:'Escalate complex issues to a human',     tag:'SUPPORT' },
+  catalog:   { id:'catalog',   icon:'🛍️', name:'Product Catalog',    desc:'Share clickable product carousel',       tag:'DISCOVER' },
+  otp:       { id:'otp',       icon:'🔐', name:'OTP / Verification', desc:'Secure login or transaction auth',       tag:'VERIFY' },
+  upsell:    { id:'upsell',    icon:'🚀', name:'Upsell Message',     desc:'Cross-sell or upgrade offer post-purchase', tag:'GROW' },
+};
+
+const SCENARIOS = [
+  {
+    id: 1,
+    emoji: '🛒',
+    title: 'Abandoned Cart Recovery',
+    desc: 'You\'re an <strong>e-commerce brand</strong>. A customer added ₹4,500 worth of sneakers to their cart and left without paying. Recover the sale on WhatsApp.',
+    hint: 'Start by reaching out, then handle objections, remove payment friction, and confirm.',
+    correctOrder: ['broadcast','chatbot','payment','confirm'],
+    distractors: ['reminder','catalog','otp'],
+    objectives: [
+      { step: 1, text: 'Re-engage the customer with a cart reminder' },
+      { step: 2, text: 'Let a chatbot handle questions & objections' },
+      { step: 3, text: 'Offer a frictionless payment link in-chat' },
+      { step: 4, text: 'Send instant order confirmation' },
+    ],
+    learning: [
+      'Broadcast recovers 15–25% of abandoned carts vs 3% for email.',
+      'Chatbot qualifies intent so only ready buyers reach checkout.',
+      'In-chat payment removes the #1 dropout point: "I\'ll pay later."',
+      'Instant confirmation reduces post-purchase anxiety and chargebacks.',
+    ],
+    wrongFeedback: 'Not quite! Think about the customer\'s mindset — they abandoned the cart, so you need to remind them before anything else.',
+    correctFeedback: '🎉 Perfect journey! Broadcast → Chatbot → Payment → Confirmation is the proven ValueFirst recipe for cart recovery.'
+  },
+  {
+    id: 2,
+    emoji: '🏨',
+    title: 'Hotel Booking Re-engagement',
+    desc: 'You\'re a <strong>travel company</strong>. A user searched for Goa hotels, got a quote, but hasn\'t booked for 48 hours. Bring them back and close the booking.',
+    hint: 'Show them what they\'re missing, let them explore, then confirm with verification.',
+    correctOrder: ['reminder','catalog','payment','otp'],
+    distractors: ['broadcast','chatbot','feedback','confirm'],
+    objectives: [
+      { step: 1, text: 'Send a timely re-engagement reminder' },
+      { step: 2, text: 'Share an interactive hotel catalog' },
+      { step: 3, text: 'Offer instant payment to secure the booking' },
+      { step: 4, text: 'Verify identity with an OTP for security' },
+    ],
+    learning: [
+      'A well-timed reminder (48h window) catches 60% of "thinking about it" users.',
+      'Catalog messages let users browse rooms without leaving WhatsApp.',
+      'Payment at point of decision cuts drop-off by up to 40%.',
+      'OTP adds trust and reduces fraudulent bookings significantly.',
+    ],
+    wrongFeedback: 'Not the right sequence. For a travel scenario, remind them of the opportunity first, then show the product catalog.',
+    correctFeedback: '✈️ Spot on! Reminder → Catalog → Payment → OTP is the winning travel journey!'
+  },
+  {
+    id: 3,
+    emoji: '🏥',
+    title: 'Healthcare Appointment + Follow-up',
+    desc: 'You run a <strong>healthcare app</strong>. A patient booked an online consult, attended it, but hasn\'t rated or rebooked. Build a journey to retain and delight them.',
+    hint: 'After a consult, the next step is support, not selling. Then collect feedback, then grow.',
+    correctOrder: ['confirm','agent','feedback','upsell'],
+    distractors: ['broadcast','chatbot','payment','reminder'],
+    objectives: [
+      { step: 1, text: 'Send post-consult confirmation & prescription' },
+      { step: 2, text: 'Offer live agent for follow-up questions' },
+      { step: 3, text: 'Collect feedback and CSAT rating' },
+      { step: 4, text: 'Upsell a health package or follow-up plan' },
+    ],
+    learning: [
+      'Post-consult confirmations with prescriptions reduce no-show rates by 35%.',
+      'Live agent access post-consultation increases patient trust 3×.',
+      'CSAT collected via WhatsApp has 70% higher response rates than email.',
+      'Upselling to satisfied patients is 5× cheaper than acquiring new ones.',
+    ],
+    wrongFeedback: 'Think about patient trust first. After a consult, patients need reassurance before you ask for a rating or upsell.',
+    correctFeedback: '🩺 Excellent care journey! Confirm → Agent → Feedback → Upsell shows you truly understand patient lifecycle!'
+  }
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  playerName: '',
+  score: 0,
+  currentScenario: 0,
+  slots: [],            // what's placed in each slot
+  timerInterval: null,
+  timeLeft: 45,
+  tries: 3,
+  totalCorrectFirst: 0,
+  totalTime: 0,
+  scenarioStartTime: 0,
+  completedScenarios: 0,
+  hasSeenTutorial: false,
+};
+
+// ═══════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ═══════════════════════════════════════════
+
+
+
+'use strict';
+/* ═══════════════════════════════════════════
+   CARDS DICTIONARY
+═══════════════════════════════════════════ */
+const CARDS={
+  broadcast:{id:'broadcast',icon:'📢',name:'WA Broadcast',     desc:'Personalised bulk message to segment',tag:'REACH'},
+  chatbot:  {id:'chatbot',  icon:'🤖',name:'AI Chatbot',        desc:'Answer queries & qualify intent 24/7', tag:'ENGAGE'},
+  payment:  {id:'payment',  icon:'💳',name:'Payment Link',      desc:'Collect payment inside WhatsApp',      tag:'CONVERT'},
+  confirm:  {id:'confirm',  icon:'✅',name:'Confirmation Msg',  desc:'Instant order/booking confirmation',   tag:'RETAIN'},
+  reminder: {id:'reminder', icon:'⏰',name:'Reminder Message',  desc:'Timely nudge at the right moment',     tag:'NURTURE'},
+  feedback: {id:'feedback', icon:'⭐',name:'Feedback / CSAT',   desc:'Review & satisfaction collection',     tag:'DELIGHT'},
+  agent:    {id:'agent',    icon:'👤',name:'Live Agent Handoff',desc:'Escalate to a human agent',            tag:'SUPPORT'},
+  catalog:  {id:'catalog',  icon:'🛍️',name:'Product Catalog',   desc:'Clickable product/service carousel',   tag:'DISCOVER'},
+  otp:      {id:'otp',      icon:'🔐',name:'OTP / Verify',      desc:'Secure auth for login or transactions',tag:'VERIFY'},
+  upsell:   {id:'upsell',   icon:'🚀',name:'Upsell Message',    desc:'Cross-sell or upgrade offer',          tag:'GROW'},
+  alert:    {id:'alert',    icon:'🔔',name:'Proactive Alert',   desc:'Real-time status/risk notification',   tag:'INFORM'},
+  onboard:  {id:'onboard',  icon:'🎓',name:'Onboarding Flow',   desc:'Step-by-step welcome & setup guide',   tag:'ACTIVATE'},
+  document: {id:'document', icon:'📄',name:'Document Share',    desc:'Send policy, report or e-doc via WA',  tag:'INFORM'},
+  location: {id:'location', icon:'📍',name:'Location Share',    desc:'Share live tracking or directions',     tag:'GUIDE'},
+  promo:    {id:'promo',    icon:'🎯',name:'Promo / Offer',     desc:'Limited-time deal or discount',        tag:'CONVERT'},
+  survey:   {id:'survey',   icon:'📊',name:'Survey / Poll',     desc:'Quick structured data collection',     tag:'LISTEN'},
+  scheduler:{id:'scheduler',icon:'📅',name:'Appointment Book',  desc:'Let customer self-book a slot',        tag:'SCHEDULE'},
+  video:    {id:'video',    icon:'🎬',name:'Video Message',     desc:'Rich product demo or explainer video', tag:'EDUCATE'},
+  referral: {id:'referral', icon:'🤝',name:'Referral Invite',   desc:'Trigger word-of-mouth via WhatsApp',   tag:'ACQUIRE'},
+  renewal:  {id:'renewal',  icon:'🔄',name:'Renewal Nudge',     desc:'Policy / subscription renewal prompt', tag:'RETAIN'},
+};
+
+/* ═══════════════════════════════════════════
+   INDUSTRIES  (10 × 2 scenarios)
+═══════════════════════════════════════════ */
+const INDUSTRIES=[
+  {id:'ecom',name:'E-commerce',emoji:'🛒',desc:'Online retail & marketplaces',scenarios:[
+    {emoji:'🛒',title:'Abandoned Cart Recovery',
+     desc:'You\'re an <strong>online fashion brand</strong>. A customer added ₹4,500 of sneakers to their cart and left without paying. Win them back on WhatsApp.',
+     hint:'Reach out first, handle objections with a bot, remove payment friction, then confirm.',
+     correctOrder:['broadcast','chatbot','payment','confirm'],
+     distractors:['reminder','catalog','otp','feedback'],
+     objectives:['Re-engage the customer with a cart reminder','Let AI chatbot handle objections','Offer frictionless in-chat payment','Send instant order confirmation'],
+     learning:['Broadcast recovers 15–25% of abandoned carts vs 3% for email.','Chatbot qualifies intent so only ready buyers reach checkout.','In-chat payment removes the #1 drop-off: "I\'ll pay later."','Confirmation reduces post-purchase anxiety & chargebacks.'],
+     correctFeedback:'🎉 Perfect! Broadcast → Chatbot → Payment → Confirmation is the proven cart recovery recipe.',
+     wrongFeedback:'The customer abandoned the cart — reach out first, handle doubts via bot, then make paying easy, then confirm.'},
+    {emoji:'📦',title:'Post-Purchase Loyalty Loop',
+     desc:'A customer just received their first order. Build a journey to <strong>delight, retain, and grow</strong> them into a loyal repeat buyer.',
+     hint:'Confirm delivery first, collect feedback, then reward and grow.',
+     correctOrder:['confirm','feedback','promo','referral'],
+     distractors:['broadcast','chatbot','otp','agent'],
+     objectives:['Send delivery confirmation & unboxing tips','Collect feedback while experience is fresh','Reward with an exclusive promo code','Invite them to refer friends for bonus'],
+     learning:['Post-delivery confirmations reduce WISMO tickets by 40%.','Feedback collected within 24h of delivery gets 3× higher response.','Personalised promo to a happy customer converts at 35%+ vs cold outreach.','Referral programs via WhatsApp generate 5× lower CAC than paid ads.'],
+     correctFeedback:'🌟 Excellent! Confirm → Feedback → Promo → Referral is the loyalty growth loop!',
+     wrongFeedback:'After delivery confirm first, then delight with feedback, reward with a promo, then grow via referral.'},
+  ]},
+  {id:'bfsi',name:'BFSI / Fintech',emoji:'🏦',desc:'Banking, insurance & financial services',scenarios:[
+    {emoji:'💳',title:'Credit Card Lead Conversion',
+     desc:'You\'re a <strong>leading bank</strong>. A customer clicked your credit card ad, filled a partial form, and dropped off. Convert them via WhatsApp.',
+     hint:'Alert them about the incomplete application, verify identity, share documents, then confirm.',
+     correctOrder:['alert','otp','document','confirm'],
+     distractors:['broadcast','chatbot','payment','feedback'],
+     objectives:['Send a proactive drop-off alert','Verify identity with OTP','Share digital KYC / application document','Confirm application received & next steps'],
+     learning:['Proactive WhatsApp alerts recover 28% of partial form drop-offs.','OTP verification on WhatsApp achieves 95%+ completion vs email links.','Document sharing via WA lets customers complete KYC without a branch visit.','Instant confirmation reduces inbound support calls by 35%.'],
+     correctFeedback:'💳 Spot on! Alert → OTP → Document → Confirm is the BFSI lead conversion flow!',
+     wrongFeedback:'In BFSI, alert the dropped lead first, then securely verify identity, share docs, then confirm.'},
+    {emoji:'🛡️',title:'Insurance Renewal Campaign',
+     desc:'A customer\'s <strong>health insurance policy</strong> expires in 7 days. They haven\'t renewed yet. Build the renewal journey.',
+     hint:'Remind them early, let a chatbot answer coverage questions, collect payment, then send the policy.',
+     correctOrder:['renewal','chatbot','payment','document'],
+     distractors:['alert','otp','feedback','broadcast'],
+     objectives:['Send timely policy renewal reminder','AI chatbot answers coverage questions','Collect renewal premium via payment link','Share updated policy document on WhatsApp'],
+     learning:['Renewal reminders 7 days before expiry achieve 62% open rate on WhatsApp.','Chatbot resolves 80% of "what does my policy cover?" queries without an agent.','In-chat payment for renewals reduces lapse rate by up to 45%.','Digital policy delivery on WhatsApp cuts printing & courier costs to zero.'],
+     correctFeedback:'🛡️ Perfect! Renewal Nudge → Chatbot → Payment → Document is the insurance renewal flow!',
+     wrongFeedback:'Start with the renewal reminder, let the bot handle doubts, then collect payment, then send the policy.'},
+  ]},
+  {id:'travel',name:'Travel & Hospitality',emoji:'✈️',desc:'Airlines, hotels & travel platforms',scenarios:[
+    {emoji:'🏨',title:'Hotel Booking Re-engagement',
+     desc:'A user searched for <strong>Goa hotels</strong>, got a quote, but hasn\'t booked in 48 hours. Bring them back and close the booking.',
+     hint:'Remind them of the opportunity, show the catalog, collect payment, then verify.',
+     correctOrder:['reminder','catalog','payment','otp'],
+     distractors:['broadcast','chatbot','feedback','confirm'],
+     objectives:['Send timely re-engagement reminder','Share interactive hotel catalog','Offer instant payment to secure booking','Verify identity with OTP for security'],
+     learning:['A 48h reminder catches 60% of "thinking about it" users.','Catalog messages let users browse rooms without leaving WhatsApp.','Payment at point of decision cuts drop-off by 40%.','OTP adds trust and reduces fraudulent bookings significantly.'],
+     correctFeedback:'✈️ Spot on! Reminder → Catalog → Payment → OTP is the winning travel booking flow!',
+     wrongFeedback:'For travel, remind them of the option first, show the catalog, make payment easy, then verify with OTP.'},
+    {emoji:'🧳',title:'Post-Trip Feedback & Loyalty',
+     desc:'A guest just checked out of your <strong>boutique hotel chain</strong>. Build a journey to collect feedback and convert them into a loyal member.',
+     hint:'Confirm checkout first, collect feedback, offer a loyalty reward, then grow via referral.',
+     correctOrder:['confirm','feedback','promo','referral'],
+     distractors:['reminder','catalog','otp','survey'],
+     objectives:['Send personalised checkout confirmation','Collect stay experience feedback','Offer exclusive loyalty discount for next stay','Invite them to refer friends for bonus points'],
+     learning:['Checkout messages with personal touches increase rebooking intent by 38%.','WhatsApp CSAT post-stay gets 4× higher response than email surveys.','Loyalty promo sent within 2h of checkout has the highest conversion window.','Referral via WhatsApp generates bookings at 60% lower CAC than search ads.'],
+     correctFeedback:'🌴 Excellent! Confirm → Feedback → Promo → Referral is the hospitality loyalty loop!',
+     wrongFeedback:'After checkout, confirm the stay summary, get feedback while it\'s fresh, then reward and grow.'},
+  ]},
+  {id:'edtech',name:'EdTech',emoji:'🎓',desc:'Online learning & education platforms',scenarios:[
+    {emoji:'📚',title:'Course Enrollment Conversion',
+     desc:'A student visited your <strong>online MBA program</strong> page, watched the intro video, but didn\'t enroll. Convert them via WhatsApp.',
+     hint:'Reach out proactively, share the course catalog, let them book a counsellor call, then collect payment.',
+     correctOrder:['broadcast','catalog','scheduler','payment'],
+     distractors:['otp','feedback','chatbot','confirm'],
+     objectives:['Send personalised course interest broadcast','Share detailed course catalog & brochure','Let student book a free counsellor session','Collect enrollment fee via payment link'],
+     learning:['Broadcast to course-interested leads gets 45% open rate vs 12% email.','Course catalog on WhatsApp lets students compare programs without site navigation.','Self-scheduling a counsellor call increases show-up rate by 55%.','Payment link in WhatsApp reduces enrollment drop-off by 30% vs redirect to site.'],
+     correctFeedback:'📚 Perfect! Broadcast → Catalog → Schedule → Payment is the EdTech enrollment funnel!',
+     wrongFeedback:'Reach the student first, show them options, book a call for confidence, then collect payment.'},
+    {emoji:'🏅',title:'Student Retention & Re-engagement',
+     desc:'A student enrolled in your platform <strong>hasn\'t logged in for 14 days</strong> and is at dropout risk. Re-engage them.',
+     hint:'Alert them about inactivity, re-onboard with fresh tips, collect feedback on what\'s wrong, then offer human support.',
+     correctOrder:['alert','onboard','feedback','agent'],
+     distractors:['broadcast','promo','payment','otp'],
+     objectives:['Send inactivity alert with progress reminder','Re-onboard with personalised learning path','Collect feedback on why they disengaged','Offer live mentor / agent support session'],
+     learning:['Inactivity alerts via WhatsApp recover 32% of at-risk students.','Personalised re-onboarding with progress summary increases return rate 3×.','Feedback collection identifies top dropout reasons for product teams.','Human mentor handoff for struggling students reduces churn by 48%.'],
+     correctFeedback:'🎓 Great! Alert → Onboard → Feedback → Agent is the student retention playbook!',
+     wrongFeedback:'First alert them, then re-onboard with fresh content, understand their issue, then offer human support.'},
+  ]},
+  {id:'health',name:'Healthcare',emoji:'🏥',desc:'Hospitals, clinics & health apps',scenarios:[
+    {emoji:'📅',title:'Appointment Booking & Reminders',
+     desc:'A patient searched for a <strong>cardiologist on your health app</strong> but didn\'t complete booking. Help them book and show up.',
+     hint:'Reach out, let them self-schedule, send a reminder before the appointment, then confirm with directions.',
+     correctOrder:['broadcast','scheduler','reminder','confirm'],
+     distractors:['chatbot','otp','feedback','agent'],
+     objectives:['Send personalised doctor availability broadcast','Let patient self-book their slot','Send appointment reminder 24h before','Confirm appointment with clinic directions'],
+     learning:['Doctor availability broadcasts see 55% click-through to the booking page.','Self-scheduling reduces booking drop-off by 40% vs a call centre flow.','WhatsApp reminders reduce no-show rates by 38% compared to SMS.','Confirmation with directions reduces "couldn\'t find the clinic" complaints by 60%.'],
+     correctFeedback:'🏥 Spot on! Broadcast → Schedule → Reminder → Confirm is the healthcare appointment flow!',
+     wrongFeedback:'Reach the patient, let them book at their convenience, remind them, then confirm with details.'},
+    {emoji:'💊',title:'Post-Consultation Care Journey',
+     desc:'A patient attended an online consultation. Build a journey to <strong>ensure adherence, collect feedback, and upsell</strong> a health package.',
+     hint:'Confirm the consult summary, offer live support, collect feedback, then suggest a health plan.',
+     correctOrder:['confirm','agent','feedback','upsell'],
+     distractors:['broadcast','chatbot','payment','reminder'],
+     objectives:['Send post-consultation summary & prescription','Offer live agent for follow-up questions','Collect patient experience feedback','Upsell a preventive health package'],
+     learning:['Post-consult summaries with prescriptions reduce medication errors by 35%.','Live agent access post-consult increases patient trust 3×.','CSAT via WhatsApp gets 70% higher response than email surveys.','Upselling to satisfied patients is 5× cheaper than acquiring new ones.'],
+     correctFeedback:'💊 Excellent! Confirm → Agent → Feedback → Upsell is the post-care retention journey!',
+     wrongFeedback:'After a consult, confirm summary first, offer support, collect feedback, then suggest a health plan.'},
+  ]},
+  {id:'logistics',name:'Logistics',emoji:'🚚',desc:'Courier, delivery & supply chain',scenarios:[
+    {emoji:'📦',title:'Delivery Exception Management',
+     desc:'A customer\'s high-value package has a <strong>delivery exception</strong> — address mismatch. Resolve it proactively before they complain.',
+     hint:'Alert them immediately, let them fix the address via chatbot, confirm the new schedule, then share live tracking.',
+     correctOrder:['alert','chatbot','confirm','location'],
+     distractors:['broadcast','payment','feedback','otp'],
+     objectives:['Send proactive delivery exception alert','Chatbot helps customer update delivery details','Confirm new delivery schedule','Share live GPS tracking link'],
+     learning:['Proactive exception alerts reduce WISMO calls by 55%.','Chatbot address update resolves 85% of exceptions without a human agent.','Re-confirmed delivery schedules reduce second-attempt failures by 40%.','Live location tracking reduces delivery anxiety and inbound support contacts.'],
+     correctFeedback:'🚚 Perfect! Alert → Chatbot → Confirm → Location is the logistics exception management flow!',
+     wrongFeedback:'Alert them first about the issue, let them fix it via bot, re-confirm schedule, then share tracking.'},
+    {emoji:'🏭',title:'B2B Shipment Updates',
+     desc:'You manage logistics for a <strong>B2B distributor</strong>. A key client\'s shipment is dispatched. Keep them informed and collect feedback.',
+     hint:'Alert on dispatch, share the invoice document, give live tracking, then collect feedback.',
+     correctOrder:['alert','document','location','feedback'],
+     distractors:['broadcast','chatbot','payment','confirm'],
+     objectives:['Send shipment dispatch alert with details','Share e-way bill / invoice document','Provide live GPS tracking link','Collect delivery experience feedback'],
+     learning:['Dispatch alerts reduce inbound "where is my order?" calls by 65%.','Digital document sharing cuts paperwork cost by 80%.','Real-time GPS tracking on WhatsApp improves B2B NPS by 22 points.','Post-delivery B2B feedback identifies SLA gaps before they escalate.'],
+     correctFeedback:'🏭 Excellent! Alert → Document → Location → Feedback is the B2B logistics update flow!',
+     wrongFeedback:'Alert dispatch first, share the documents, then provide live tracking, then collect feedback.'},
+  ]},
+  {id:'realty',name:'Real Estate',emoji:'🏠',desc:'Property buying, renting & management',scenarios:[
+    {emoji:'🔑',title:'Property Lead Nurturing',
+     desc:'A prospect clicked your <strong>luxury apartment</strong> ad and submitted a query. They haven\'t responded to calls. Try WhatsApp.',
+     hint:'Reach out, share the property catalog, book a site visit, then confirm with location details.',
+     correctOrder:['broadcast','catalog','scheduler','confirm'],
+     distractors:['payment','otp','feedback','agent'],
+     objectives:['Send personalised property interest message','Share interactive property catalog / virtual tour','Let prospect self-book a site visit slot','Confirm site visit with address & contact'],
+     learning:['WhatsApp outreach to real estate leads gets 4× more responses than calls.','Property catalogs with photos & pricing on WA reduce cold-call friction.','Self-scheduling site visits increases show-up rate by 52%.','Visit confirmation with precise location reduces no-shows by 38%.'],
+     correctFeedback:'🏠 Perfect! Broadcast → Catalog → Schedule → Confirm is the property lead nurturing flow!',
+     wrongFeedback:'Reach the lead on WhatsApp, show them properties, let them book a visit, then confirm with details.'},
+    {emoji:'🏗️',title:'Post-Booking Onboarding',
+     desc:'A customer just booked a flat worth ₹85 lakhs. Build a journey to <strong>onboard them, collect documents, and retain</strong> them long-term.',
+     hint:'Welcome and onboard them first, collect KYC documents, share payment schedule, then get feedback.',
+     correctOrder:['onboard','document','payment','feedback'],
+     distractors:['broadcast','catalog','reminder','confirm'],
+     objectives:['Send personalised welcome & onboarding message','Collect KYC & legal documents digitally','Share payment milestone schedule','Collect post-booking experience feedback'],
+     learning:['WhatsApp onboarding after booking reduces "buyer\'s remorse" cancellations by 28%.','Digital KYC collection on WhatsApp cuts process time from 7 days to 1 day.','Payment schedule shared on WhatsApp reduces default rate by 22%.','Post-booking feedback identifies issues before they become escalations.'],
+     correctFeedback:'🔑 Excellent! Onboard → Document → Payment → Feedback is the real estate post-booking flow!',
+     wrongFeedback:'Welcome and onboard first, then collect documents, share payment plan, then get their feedback.'},
+  ]},
+  {id:'d2c',name:'D2C / FMCG',emoji:'🧴',desc:'Direct-to-consumer & consumer brands',scenarios:[
+    {emoji:'🎯',title:'New Product Launch Campaign',
+     desc:'You\'re a <strong>D2C skincare brand</strong> launching a new serum. Build a WhatsApp journey to create buzz and drive first purchases.',
+     hint:'Create awareness with a broadcast, educate with a video, incentivise with a promo, then learn from feedback.',
+     correctOrder:['broadcast','video','promo','feedback'],
+     distractors:['chatbot','payment','catalog','confirm'],
+     objectives:['Send teaser broadcast to existing customers','Share product explainer video','Offer launch-day exclusive discount','Collect first impressions & feedback'],
+     learning:['Product launch broadcasts on WhatsApp achieve 68% open rate vs 18% email.','Video messages increase purchase intent by 3× vs text-only messages.','Launch-day promo with urgency converts 28% of engaged viewers.','Feedback on new products provides instant market research at zero cost.'],
+     correctFeedback:'🧴 Brilliant! Broadcast → Video → Promo → Feedback is the D2C product launch playbook!',
+     wrongFeedback:'Create awareness first, educate with video, incentivise with promo, then learn from feedback.'},
+    {emoji:'🔄',title:'Subscription Renewal & Upsell',
+     desc:'A customer\'s <strong>monthly D2C subscription box</strong> is due for renewal. They\'ve been a subscriber for 6 months. Retain and grow them.',
+     hint:'Remind about renewal, pitch the upgrade, collect payment, then invite them to refer.',
+     correctOrder:['renewal','upsell','payment','referral'],
+     distractors:['broadcast','feedback','confirm','catalog'],
+     objectives:['Send subscription renewal reminder','Suggest an upgraded subscription plan','Collect renewal payment via WhatsApp','Reward with referral program invite'],
+     learning:['WhatsApp renewal reminders achieve 55% higher click-through than email.','Upsell at the renewal moment — when customer intent is highest — converts at 22%.','In-chat payment at renewal reduces subscription lapse rate by 40%.','Loyal subscribers who refer friends have 3× higher LTV than solo subscribers.'],
+     correctFeedback:'🔄 Perfect! Renewal → Upsell → Payment → Referral is the subscription growth loop!',
+     wrongFeedback:'Remind about renewal, pitch the upgrade, collect payment, then turn them into an advocate.'},
+  ]},
+  {id:'auto',name:'Automotive',emoji:'🚗',desc:'Car sales, service & mobility',scenarios:[
+    {emoji:'🚗',title:'Test Drive Lead Conversion',
+     desc:'A prospect submitted a <strong>test drive request</strong> on your car brand website but hasn\'t confirmed a slot. Convert them via WhatsApp.',
+     hint:'Follow up proactively, let them self-schedule, remind them the day before, then collect post-drive feedback.',
+     correctOrder:['broadcast','scheduler','reminder','feedback'],
+     distractors:['payment','catalog','otp','confirm'],
+     objectives:['Send personalised test drive follow-up','Let prospect self-schedule their preferred slot','Send day-before test drive reminder','Collect post-test-drive experience feedback'],
+     learning:['WhatsApp test drive follow-ups achieve 3× higher slot confirmation than email.','Self-scheduling increases test drive show-up rate by 48%.','Day-before reminders reduce no-shows from 35% to under 10%.','Post-test-drive feedback reveals objections for the sales team to address.'],
+     correctFeedback:'🚗 Perfect! Broadcast → Schedule → Reminder → Feedback is the automotive test drive flow!',
+     wrongFeedback:'Follow up first, let them choose their time, remind them the day before, then collect feedback.'},
+    {emoji:'🔧',title:'Vehicle Service & Upsell',
+     desc:'A customer\'s <strong>car service is due</strong> in 5 days. Build a journey to get them in for service and upsell additional maintenance.',
+     hint:'Alert them about the due service, let them book a slot, confirm the appointment, then upsell add-ons.',
+     correctOrder:['alert','scheduler','confirm','upsell'],
+     distractors:['broadcast','feedback','payment','otp'],
+     objectives:['Send proactive service due alert','Let customer book service appointment','Confirm service booking with details','Suggest additional maintenance add-ons'],
+     learning:['Service due alerts via WhatsApp achieve 72% open rate — highest in automotive.','Self-scheduling for service increases booking conversion by 45% vs a call centre.','Booking confirmation with service checklist reduces cancellations by 30%.','Upsell of add-ons at confirmation stage generates 18% incremental revenue.'],
+     correctFeedback:'🔧 Excellent! Alert → Schedule → Confirm → Upsell is the automotive service journey!',
+     wrongFeedback:'Alert about the service due date, let them book, confirm the appointment, then suggest add-ons.'},
+  ]},
+  {id:'saas',name:'SaaS / IT',emoji:'💻',desc:'Software products & IT services',scenarios:[
+    {emoji:'🆓',title:'Free Trial to Paid Conversion',
+     desc:'A user signed up for your <strong>SaaS product\'s 14-day free trial</strong> and is on day 10 with low usage. Convert them before expiry.',
+     hint:'Alert them about expiry, re-onboard with tips, offer a promo to convert, then collect payment.',
+     correctOrder:['alert','onboard','promo','payment'],
+     distractors:['broadcast','chatbot','confirm','feedback'],
+     objectives:['Send trial expiry alert with usage summary','Share onboarding tips to boost product value','Offer special first-month discount','Collect payment to activate paid plan'],
+     learning:['Trial expiry alerts on WhatsApp recover 35% of low-usage trial users.','Onboarding tips via WhatsApp increase feature adoption by 52% in the last 4 trial days.','Limited-time promo at trial end converts 28% of fence-sitters.','Frictionless payment link in WhatsApp reduces upgrade abandonment by 38%.'],
+     correctFeedback:'💻 Brilliant! Alert → Onboard → Promo → Payment is the SaaS trial conversion flow!',
+     wrongFeedback:'Alert about trial expiry, help them get value first, incentivise with a promo, then collect payment.'},
+    {emoji:'🛠️',title:'Support Ticket to Growth',
+     desc:'A customer raised a <strong>critical support ticket</strong>. They\'re frustrated. Resolve it and turn it into a growth opportunity.',
+     hint:'Acknowledge the ticket first, handoff to a live agent, collect feedback post-resolution, then upsell.',
+     correctOrder:['alert','agent','feedback','upsell'],
+     distractors:['broadcast','onboard','payment','confirm'],
+     objectives:['Send immediate ticket acknowledgement alert','Handoff to live support agent on WhatsApp','Collect satisfaction feedback post-resolution','Offer an upsell or loyalty reward to retain'],
+     learning:['Instant ticket acknowledgement on WhatsApp reduces escalation rate by 45%.','WhatsApp live agent support achieves 92% CSAT vs email tickets.','Post-resolution feedback identifies systemic issues before they affect more customers.','A well-resolved complaint creates a more loyal customer than one who never complained.'],
+     correctFeedback:'🛠️ Perfect! Alert → Agent → Feedback → Upsell is the SaaS support-to-growth journey!',
+     wrongFeedback:'Acknowledge the ticket first, resolve with a live agent, get feedback, then earn back trust with an offer.'},
+  ]},
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const S={
+  name:'',company:'',pid:'',avatarName:'',avatarId:'',
+  totalScore:0,
+  curIndustry:null,curRound:0,
+  slots:[],
+  timerIv:null,timeLeft:45,
+  roundResults:[],
+  playedSet:new Set(),
+  roundScore:0,
+  pendingCb:null, hasSeenTutorial:false, // safe callback store
+};
+
+/* ═══════════════════════════════════════════
+   LEADERBOARD  — uses localStorage as fallback
+   (works in plain browser AND in Claude artifacts
+   which expose window.storage)
+═══════════════════════════════════════════ */
+const LB_KEY='vf_lb_v3';
+
+async function lbGet(){
+  // Try artifact storage first
+  if(window.storage){
+    try{
+      const r=await window.storage.get(LB_KEY,true);
+      return r?JSON.parse(r.value):[];
+    }catch(e){}
+  }
+  // Fallback: localStorage
+  try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]');}catch(e){return[];}
+}
+
+async function lbSave(entries){
+  const str=JSON.stringify(entries);
+  if(window.storage){
+    try{await window.storage.set(LB_KEY,str,true);return;}catch(e){}
+  }
+  try{localStorage.setItem(LB_KEY,str);}catch(e){}
+}
+
+async function lbUpsert(name,company,score,id,avatarName){
+  let list=await lbGet();
+  const idx=list.findIndex(e=>e.id===id);
+  if(idx>=0){
+    if(score>list[idx].score)list[idx].score=score;
+    if(avatarName) list[idx].avatarName=avatarName;
+  }
+  else list.push({id,name,company,score,avatarName,ts:Date.now()});
+  list.sort((a,b)=>b.score-a.score);
+  await lbSave(list);
+  return list;
+}
+
+async function renderLB(containerId,highlightId){
+  const list=await lbGet();
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  if(!list.length){
+    el.innerHTML='<div class="lb-empty">🎮 Be the first to play!<br>Scores appear here live.</div>';
+    return;
+  }
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=list.slice(0,15).map((e,i)=>`
+    <div class="lb-row ${i===0?'r1':i===1?'r2':i===2?'r3':''}">
+      <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${xss(e.name)}${e.id===highlightId?'<span class="lb-you">YOU</span>':''}</div>
+        <div class="lb-co">${xss(e.avatarName || e.company)}</div>
+      </div>
+      <div class="lb-pts">${e.score}</div>
+    </div>`).join('');
+}
+
+function xss(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN NAV
+═══════════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   LEAD FORM
+═══════════════════════════════════════════ */
+function submitLead(){
+  let ok=true;
+  function chk(inputId,errId,fn){
+    const v=document.getElementById(inputId).value;
+    const e=document.getElementById(errId);
+    if(!fn(v)){e.style.display='block';ok=false;}else e.style.display='none';
+    return v;
+  }
+  const fn=chk('ff-fn','fe-fn',v=>v.trim().length>0);
+  const ln=chk('ff-ln','fe-ln',v=>v.trim().length>0);
+  chk('ff-em','fe-em',v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+  chk('ff-ph','fe-ph',v=>v.trim().length>5);
+  const co=chk('ff-co','fe-co',v=>v.trim().length>0);
+  chk('ff-ind','fe-ind',v=>v!=='');
+  const cb=document.getElementById('ff-con');
+  const ce=document.getElementById('fe-con');
+  if(!cb.checked){ce.style.display='block';ok=false;}else ce.style.display='none';
+  if(!ok)return;
+
+  S.name=fn.trim()+' '+ln.trim();
+  S.company=co.trim();
+  S.avatarId=currentAvatarId;
+  const av = avatars.find(a=>a.id===currentAvatarId);
+  S.avatarName=av ? av.name : 'Player';
+  S.pid='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  S.totalScore=0;
+  S.playedSet=new Set();
+  S.roundResults=[];
+
+  const lead={type:'lead',name:S.name,email:document.getElementById('ff-em').value,
+    phone:document.getElementById('ff-ph').value,company:S.company,
+    industry:document.getElementById('ff-ind').value,
+    tool:document.getElementById('ff-cur').value,avatar:S.avatarName,ts:new Date().toISOString()};
+  console.log('[VF Lead]',JSON.stringify(lead,null,2));
+  
+  if (GOOGLE_SHEET_URL !== 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL') {
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(lead)
+    }).catch(e=>console.error(e));
+  }
+
+  const avt1 = document.getElementById('player-avatar-1');
+  const avt2 = document.getElementById('player-avatar-2');
+  if(av) {
+    if(avt1) { avt1.src = av.src; avt1.style.display = 'block'; }
+    if(avt2) { avt2.src = av.src; avt2.style.display = 'block'; }
+  }
+  document.getElementById('player-name-1').textContent = S.name;
+  document.getElementById('player-name-2').textContent = S.name;
+  document.getElementById('player-role-1').textContent = S.avatarName;
+  document.getElementById('player-role-2').textContent = S.avatarName;
+  goIndustrySelect();
+}
+
+/* ═══════════════════════════════════════════
+   INDUSTRY SELECT
+═══════════════════════════════════════════ */
+function goIndustrySelect(){
+  document.getElementById('total-sc-hdr').textContent=S.totalScore;
+  renderHoloMap();
+  showScreen('industry-screen');
+}
+
+const mapPos = [
+  {x: 18, y: 35}, // Ecomm
+  {x: 40, y: 15}, // BFSI
+  {x: 65, y: 20}, // Travel
+  {x: 85, y: 35}, // EdTech
+  {x: 80, y: 65}, // Health
+  {x: 60, y: 80}, // Logistics
+  {x: 50, y: 55}, // RealEstate (Center bottom)
+  {x: 25, y: 85}, // D2C
+  {x: 10, y: 60}, // Auto
+  {x: 45, y: 35}, // SaaS (Center top)
+];
+
+function renderHoloMap() {
+  const wrap = document.getElementById('map-nodes-wrap');
+  const svg = document.getElementById('map-svg');
+  if(!wrap || !svg) return;
+  
+  wrap.innerHTML = '';
+  svg.innerHTML = '';
+  
+  // Draw glowing network lines
+  const connections = [[0,1], [1,9], [9,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,0], [9,6]];
+  connections.forEach(([a, b]) => {
+    const p1 = mapPos[a];
+    const p2 = mapPos[b];
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x + '%');
+    line.setAttribute('y1', p1.y + '%');
+    line.setAttribute('x2', p2.x + '%');
+    line.setAttribute('y2', p2.y + '%');
+    svg.appendChild(line);
+  });
+
+  INDUSTRIES.forEach((ind, i) => {
+    const p = mapPos[i];
+    const locked = S.playedSet.has(ind.id);
+    
+    const node = document.createElement('div');
+    node.className = 'map-node' + (locked ? ' locked' : '');
+    node.style.left = p.x + '%';
+    node.style.top = p.y + '%';
+    
+    node.innerHTML = `
+      ${ind.emoji}
+      <div class="node-label">${ind.name}</div>
+    `;
+    
+    node.onmouseenter = () => focusHoloNode(i, node);
+    node.onclick = () => focusHoloNode(i, node);
+    
+    wrap.appendChild(node);
+  });
+  
+  // Close HUD if clicking empty space
+  document.getElementById('map-container').addEventListener('click', (e) => {
+    if(e.target.id === 'map-container' || e.target.id === 'map-svg') {
+      const hud = document.getElementById('map-hud');
+      if(hud) hud.classList.remove('open');
+      document.querySelectorAll('.map-node').forEach(n => n.classList.remove('active-node'));
+    }
+  });
+}
+
+
+function focusHoloNode(idx, nodeEl) {
+  document.querySelectorAll('.map-node').forEach(n => n.classList.remove('active-node'));
+  if (nodeEl) nodeEl.classList.add('active-node');
+
+  const ind = INDUSTRIES[idx];
+  const locked = S.playedSet.has(ind.id);
+  const hud = document.getElementById('map-hud');
+  if(!hud) return;
+  
+  hud.innerHTML = `
+    <div style="font-size:12px; color:var(--g); font-weight:800; letter-spacing:2px; margin-bottom:12px;">MISSION DOSSIER</div>
+    <div class="hud-emoji">${ind.emoji}</div>
+    <div class="hud-title">${ind.name}</div>
+    <div class="hud-desc">${ind.desc}</div>
+    <div style="flex:1;"></div>
+    ${locked 
+      ? '<button class="hud-btn locked">🔒 COMPLETED</button>' 
+      : `<button class="hud-btn" onclick="selectIndustry(${idx})">▶ INITIATE MISSION</button>`
+    }
+  `;
+  hud.classList.add('open');
+}
+
+window.selectIndustry = function(idx) {
+  const ind = INDUSTRIES[idx];
+  const dummyCard = document.createElement('div'); // to prevent pop class error
+  startIndustry(ind, dummyCard);
+};
+
+function startIndustry(ind,card){
+  card.classList.add('pop');
+  setTimeout(()=>{
+    S.curIndustry=ind;
+    S.curRound=0;
+    S.roundScore=0;
+    loadRound(0);
+    showScreen('game-screen');
+    // Check if we should show tutorial
+    if (!S.hasSeenTutorial) {
+      S.hasSeenTutorial = true;
+      setTimeout(startTutorial, 300);
+    } else {
+      startTimer();
+    }
+  },320);
+}
+
+function goPickAnotherIndustry(){goIndustrySelect();}
+
+/* ═══════════════════════════════════════════
+   GAME ENGINE
+═══════════════════════════════════════════ */
+function loadRound(idx){
+  const sc=S.curIndustry.scenarios[idx];
+  S.slots=new Array(sc.correctOrder.length).fill(null);
+  S.timeLeft=45;
+  S.curRound=idx;
+
+  // Header
+  document.getElementById('g-ind-name').textContent=S.curIndustry.emoji+' '+S.curIndustry.name;
+  document.getElementById('g-score').textContent=S.totalScore+S.roundScore;
+
+  // Progress pips
+  const pipsEl=document.getElementById('g-pips');
+  pipsEl.innerHTML='';
+  S.curIndustry.scenarios.forEach((_,i)=>{
+    const prev=S.roundResults.find(r=>r.iid===S.curIndustry.id&&r.ri===i);
+    const p=document.createElement('div');
+    p.className='pip'+(prev?(prev.ok?' ok':' bad'):(i===idx?' cur':''));
+    pipsEl.appendChild(p);
+  });
+
+  // Progress bar
+  document.getElementById('g-prog').style.width=(idx/S.curIndustry.scenarios.length*100)+'%';
+
+  // Scenario panel
+  document.getElementById('sc-emo').textContent=sc.emoji;
+  document.getElementById('sc-desc').innerHTML=sc.desc;
+  document.getElementById('hint-txt').textContent=sc.hint;
+
+  // Objectives
+  const ol=document.getElementById('obj-list');
+  ol.innerHTML='';
+  sc.objectives.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='obj-item';d.id='oi-'+i;
+    d.innerHTML=`<div class="onum">${i+1}</div><span>${o}</span>`;
+    ol.appendChild(d);
+  });
+
+  // Drop slots
+  const lane=document.getElementById('j-lane');
+  lane.innerHTML='';
+  sc.correctOrder.forEach((_,i)=>{
+    if(i>0){
+      const a=document.createElement('div');
+      a.className='arr';a.id='arr-'+i;a.textContent='→';
+      lane.appendChild(a);
+    }
+    const slot=document.createElement('div');
+    slot.className='dslot';slot.id='ds-'+i;slot.dataset.idx=i;
+    slot.innerHTML=`<div class="snum">STEP ${i+1}</div><div class="sph">＋</div><div class="shi">Drop here</div>`;
+    slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('over');});
+    slot.addEventListener('dragleave',()=>slot.classList.remove('over'));
+    slot.addEventListener('drop',e=>{e.preventDefault();slot.classList.remove('over');handleDrop(e,i);});
+    lane.appendChild(slot);
+    if (i < sc.correctOrder.length - 1) {
+      const arr = document.createElement('div');
+      arr.className = 'slot-arrow';
+      arr.innerHTML = '➔';
+      lane.appendChild(arr);
+    }
+  });
+
+  // Card tray
+  const tray=document.getElementById('card-tray');
+  tray.innerHTML='';
+  const ids=[...sc.correctOrder,...sc.distractors].sort(()=>Math.random()-.5);
+  ids.forEach(cid=>{
+    const c=CARDS[cid];
+    const el=document.createElement('div');
+    el.className='tc';el.id='tc-'+cid;el.draggable=true;el.dataset.cid=cid;
+    el.innerHTML=`<div class="tc-ico">${c.icon}</div><div><div class="tc-nm">${c.name}</div><div class="tc-ds">${c.desc}</div></div>`;
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('cid',cid);el.classList.add('dragging');});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    tray.appendChild(el);
+  });
+
+  // Reset feedback bar
+  const fb=document.getElementById('fb-bar');
+  fb.className='fb-bar';fb.textContent='';
+  document.getElementById('tl-txt').textContent='Fill all slots to submit';
+  updateChkBtn();
+  if (S.hasSeenTutorial) startTimer();
+}
+
+function handleDrop(e,si){
+  const cid=e.dataTransfer.getData('cid');
+  if(!cid)return;
+  // Remove card from any other slot
+  S.slots=S.slots.map(s=>s===cid?null:s);
+  S.slots[si]=cid;
+  renderSlots();updateChkBtn();
+}
+
+function removeFromSlot(si){
+  S.slots[si]=null;renderSlots();updateChkBtn();
+}
+
+function renderSlots(){
+  const sc=S.curIndustry.scenarios[S.curRound];
+  sc.correctOrder.forEach((_,i)=>{
+    const slot=document.getElementById('ds-'+i);
+    const cid=S.slots[i];
+    if(cid){
+      const c=CARDS[cid];
+      slot.classList.add('filled');
+      slot.innerHTML=`<div class="snum">STEP ${i+1}</div>`
+        +`<button class="rm-btn" onclick="removeFromSlot(${i})">✕</button>`
+        +`<div class="pc"><div class="pc-ico">${c.icon}</div><div class="pc-nm">${c.name}</div><div class="pc-tg">${c.tag}</div></div>`;
+    }else{
+      slot.classList.remove('filled');
+      slot.innerHTML=`<div class="snum">STEP ${i+1}</div><div class="sph">＋</div><div class="shi">Drop here</div>`;
+    }
+  });
+  const used=S.slots.filter(Boolean);
+  document.querySelectorAll('.tc').forEach(el=>el.classList.toggle('used',used.includes(el.dataset.cid)));
+}
+
+function updateChkBtn(){
+  const full=S.slots.every(s=>s!==null);
+  document.getElementById('chk-btn').disabled=!full;
+  document.getElementById('tl-txt').textContent=full?'Ready — submit your answer!':'Fill all slots to submit';
+}
+
+function checkAnswer(){
+  clearInterval(S.timerIv);
+  const sc=S.curIndustry.scenarios[S.curRound];
+  const correct=S.slots.every((s,i)=>s===sc.correctOrder[i]);
+  const pts=correct?100+(S.timeLeft*2):0;
+  S.roundScore+=pts;
+  if(correct)S.totalScore+=pts;
+  document.getElementById('g-score').textContent=S.totalScore+S.roundScore;
+
+  // Record result
+  S.roundResults.push({iid:S.curIndustry.id,ri:S.curRound,ok:correct,pts});
+
+  // Store callback safely (avoid serialising closures)
+  const nextRound=S.curRound+1;
+  const hasNext=nextRound<S.curIndustry.scenarios.length;
+  S.pendingCb=()=>{
+    if(hasNext)loadRound(nextRound);
+    else finishIndustry();
+  };
+
+  showReveal(correct,sc);
+}
+
+/* ═══════════════════════════════════════════
+   REVEAL OVERLAY
+═══════════════════════════════════════════ */
+function showReveal(correct,sc){
+  // Remove any existing overlay
+  document.querySelectorAll('.reveal-ov').forEach(el=>el.remove());
+
+  const ov=document.createElement('div');
+  ov.className='reveal-ov';
+
+  const stepsHtml=sc.correctOrder.map((id,i)=>{
+    const c=CARDS[id];
+    return (i>0?'<div class="rev-arr">→</div>':'')+
+      `<div class="rev-step"><div class="ri">${c.icon}</div><div class="rn">${c.name}</div></div>`;
+  }).join('');
+
+  const isLast=S.curRound+1>=S.curIndustry.scenarios.length;
+  const btnLabel=isLast?'See Results →':'Next Challenge →';
+
+  ov.innerHTML=`
+    <div class="reveal-box">
+      <h3 class="${correct?'ok':'bad'}">${correct?'✅ Correct Journey!':'❌ Not Quite Right'}</h3>
+      <p style="font-size:14px;color:#475569;margin:12px 0 20px;line-height:1.5;">${correct?sc.correctFeedback:sc.wrongFeedback}</p>
+      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--g);margin-bottom:14px;text-transform:uppercase;">THE CORRECT ORDER</div>
+      <div class="rev-steps">${stepsHtml}</div>
+      <div class="rev-explain" style="color:#64748B;font-weight:500;margin-bottom:24px;">${sc.learning.slice(0,2).join(' ')}</div>
+      <button class="btn-chk" id="reveal-next-btn" style="width:100%;margin-top:10px;">${btnLabel}</button>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  // Attach click AFTER appending so the element exists
+  document.getElementById('reveal-next-btn').addEventListener('click',()=>{
+    ov.remove();
+    if(S.pendingCb){const cb=S.pendingCb;S.pendingCb=null;cb();}
+  });
+}
+
+/* ═══════════════════════════════════════════
+   TIMER
+═══════════════════════════════════════════ */
+function startTimer(){
+  clearInterval(S.timerIv);
+  const circ=125.6;
+  const arc=document.getElementById('t-arc');
+  const num=document.getElementById('t-num');
+  arc.setAttribute('stroke','#00C566');
+  num.style.color='#00C566';
+
+  S.timerIv=setInterval(()=>{
+    S.timeLeft--;
+    num.textContent=S.timeLeft;
+    arc.setAttribute('stroke-dashoffset',circ*(1-S.timeLeft/45));
+    if(S.timeLeft<=10){arc.setAttribute('stroke','#ff4d6a');num.style.color='#ff4d6a';}
+    if(S.timeLeft<=0){
+      clearInterval(S.timerIv);
+      const sc=S.curIndustry.scenarios[S.curRound];
+      S.roundResults.push({iid:S.curIndustry.id,ri:S.curRound,ok:false,pts:0});
+      const isLast=S.curRound+1>=S.curIndustry.scenarios.length;
+      S.pendingCb=()=>{
+        if(!isLast)loadRound(S.curRound+1);
+        else finishIndustry();
+      };
+      showReveal(false,sc);
+    }
+  },1000);
+}
+
+/* ═══════════════════════════════════════════
+   FINISH INDUSTRY → RESULTS
+═══════════════════════════════════════════ */
+async function finishIndustry(){
+  clearInterval(S.timerIv);
+  S.playedSet.add(S.curIndustry.id);
+
+  const res=S.roundResults.filter(r=>r.iid===S.curIndustry.id);
+  const roundPts=res.reduce((a,r)=>a+r.pts,0);
+  const correctN=res.filter(r=>r.ok).length;
+  const acc=Math.round(correctN/S.curIndustry.scenarios.length*100);
+
+  // Upsert leaderboard
+  const list=await lbUpsert(S.name,S.company,S.totalScore,S.pid,S.avatarName);
+  const myRank=list.findIndex(e=>e.id===S.pid)+1;
+  
+  // Post score to Google Sheets
+  if (GOOGLE_SHEET_URL !== 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL') {
+    const scoreData = { type: 'score', name: S.name, company: S.company, avatar: S.avatarName, score: S.totalScore, acc: acc, ts: new Date().toISOString() };
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(scoreData)
+    }).catch(e=>console.error(e));
+  }
+
+  // Trophy & copy
+  const trophy=correctN===2?'🏆':correctN===1?'🥈':'🎓';
+  document.getElementById('r-trophy').textContent=trophy;
+  document.getElementById('r-title').innerHTML=
+    correctN===2?`${S.curIndustry.emoji} <em>Journey Master!</em>`
+    :correctN===1?`${S.curIndustry.emoji} <em>Good Effort!</em>`
+    :`${S.curIndustry.emoji} <em>Keep Practicing!</em>`;
+  document.getElementById('r-sub').textContent=
+    correctN===2
+      ?`Flawless, ${S.name.split(' ')[0]}! You aced both ${S.curIndustry.name} challenges. This is exactly how Infinito builds journeys — drag, drop, launch.`
+      :correctN===1
+      ?`Nice try, ${S.name.split(' ')[0]}! You got 1 of 2 right. With Infinito, the platform guides you to the perfect journey every time.`
+      :`Good attempt, ${S.name.split(' ')[0]}! Don't worry — with Infinito's visual builder, you'd get it right on the first drag.`;
+
+  document.getElementById('r-score').textContent=roundPts;
+  document.getElementById('r-total').textContent=S.totalScore;
+  document.getElementById('r-acc').textContent=acc+'%';
+
+  // Mini leaderboard
+  const topRows=list.slice(0,5).map((e,i)=>
+    `<div class="mlb-row ${e.id===S.pid?'hl':''}">
+      <span style="width:22px;font-weight:700;">#${i+1}</span>
+      <span style="flex:1;">${xss(e.name)} <span style="color:var(--mu);font-size:10px;">${xss(e.avatarName || e.company)}</span></span>
+      <span style="color:var(--g);font-weight:800;">${e.score}</span>
+    </div>`).join('');
+  document.getElementById('r-mini-lb').innerHTML=`<h4>🏆 TOP PLAYERS · You are #${myRank}</h4>`+topRows;
+
+  // Learning summary from both scenarios
+  const learns=[...S.curIndustry.scenarios[0].learning,...(S.curIndustry.scenarios[1]?.learning||[])].slice(0,4);
+  document.getElementById('r-learn').innerHTML=
+    `<h4>WHAT THESE JOURNEYS DO FOR YOUR BUSINESS</h4>`
+    +learns.map(l=>`<div class="litem">${l}</div>`).join('');
+
+  // CTA: check remaining industries
+  const remaining=INDUSTRIES.filter(ind=>!S.playedSet.has(ind.id));
+  const ctaEl=document.getElementById('r-cta');
+  if(remaining.length===0){
+    ctaEl.innerHTML=`<button class="btn-p" onclick="showScreen('splash')">All Industries Played! 🎉 Restart</button>`;
+  }else{
+    ctaEl.innerHTML=`
+      <button class="btn-p" onclick="goPickAnotherIndustry()">Play Another Industry →</button>
+      <button class="btn-s" onclick="showScreen('splash')">Back to Start</button>`;
+  }
+
+  showScreen('result-screen');
+  if(correctN===2)confetti();
+}
+
+/* ═══════════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════════ */
+function confetti(){
+  const cv=document.getElementById('confetti-cv');
+  const ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const pieces=Array.from({length:120},()=>({
+    x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,
+    w:6+Math.random()*9,h:4+Math.random()*5,
+    r:Math.random()*Math.PI*2,
+    vy:2.5+Math.random()*3.5,vx:(Math.random()-.5)*2.5,vr:(Math.random()-.5)*.15,
+    col:['#00C566','#fff','#00e07a','#25D366','#ffe066','#ff6b6b','#a78bfa'][Math.floor(Math.random()*7)]
+  }));
+  let f=0;
+  (function draw(){
+    if(f++>240){ctx.clearRect(0,0,cv.width,cv.height);return;}
+    ctx.clearRect(0,0,cv.width,cv.height);
+    pieces.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);
+      ctx.fillStyle=p.col;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+
+
+// Particles and Floating Icons
+const canvas = document.getElementById('splash-canvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+let particles = [];
+
+function resizeCanvas() {
+  if(!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function createParticles() {
+  if(!canvas) return;
+  particles = [];
+  for(let i=0; i<60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5
+    });
+  }
+}
+
+function animate() {
+  if(!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(242, 101, 34, 0.5)';
+  
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if(p.x < 0) p.x = canvas.width;
+    if(p.x > canvas.width) p.x = 0;
+    if(p.y < 0) p.y = canvas.height;
+    if(p.y > canvas.height) p.y = 0;
+    
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  
+  ctx.strokeStyle = 'rgba(42, 51, 116, 0.05)';
+  ctx.lineWidth = 1;
+  for(let i=0; i<particles.length; i++) {
+    for(let j=i+1; j<particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < 100) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function createFloatingIcons() {
+  const container = document.getElementById('floating-icons');
+  if(!container) return;
+  container.innerHTML = '';
+  const icons = ['🛒', '📢', '🤖', '💳', '✅', '⏰', '⭐', '👤', '🛍️', '🔐'];
+  for(let i=0; i<15; i++) {
+    const el = document.createElement('div');
+    el.className = 'float-icon';
+    el.textContent = icons[Math.floor(Math.random() * icons.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (15 + Math.random() * 20) + 's';
+    el.style.animationDelay = (Math.random() * -20) + 's';
+    container.appendChild(el);
+  }
+}
+
+
+async function renderSplashLeaderboard() {
+  let list = await lbGet();
+  
+  // Fallback mock data if less than 3 players
+  const mocks = [
+    { name: 'Alex', avatarName: 'Strategist', score: 1420 },
+    { name: 'Sarah', avatarName: 'Growth Marketer', score: 1350 },
+    { name: 'Jordan', avatarName: 'Code Ninja', score: 1280 }
+  ];
+  
+  while(list.length < 3) {
+    list.push(mocks[list.length]);
+  }
+  
+  const top3 = list.slice(0, 3);
+  const container = document.getElementById('splash-lb-rows');
+  if(!container) return;
+  
+  const medals = ['🥇', '🥈', '🥉'];
+  container.innerHTML = top3.map((p, i) => `
+    <div class="champ-row">
+      <div class="champ-player"><span>${medals[i]}</span> ${p.name.split(' ')[0]} (${p.avatarName || 'Player'})</div>
+      <div class="champ-score">${p.score.toLocaleString()} <span style="font-size:10px;color:#94A3B8;">pts</span></div>
+    </div>
+  `).join('');
+}
+
+// Tutorial Logic
+let tutStep = 0;
+const tutSteps = [
+  { target: '.sc-panel', title: 'Understand the Goal', desc: 'Read the business challenge and look at the hint to figure out the right sequence of touchpoints.', pos: 'right' },
+  { target: '.tray-panel', title: 'Pick the Touchpoints', desc: 'Drag the correct tools from the tray onto the empty slots on the board.', pos: 'left' },
+  { target: '#j-lane', title: 'Build the Journey', desc: 'Drop the cards here. Once all slots are filled, submit your answer!', pos: 'top' },
+  { target: '.timer-w', title: 'Beat the Clock', desc: 'You have 45 seconds. The faster you solve it, the more points you get. Good luck!', pos: 'bottom' }
+];
+
+function startTutorial() {
+  tutStep = 0;
+  const ov = document.getElementById('tutorial-overlay');
+  if(ov) ov.style.display = 'block';
+  showTutorialStep();
+}
+
+function showTutorialStep() {
+  if (tutStep >= tutSteps.length) {
+    const ov = document.getElementById('tutorial-overlay');
+    if(ov) ov.style.display = 'none';
+    startTimer(); // start game timer after tutorial
+    return;
+  }
+  const s = tutSteps[tutStep];
+  const el = document.querySelector(s.target);
+  if (!el) { nextTutorialStep(); return; }
+  
+  const rect = el.getBoundingClientRect();
+  const hole = document.getElementById('tut-hole');
+  if(hole) {
+    hole.style.top = (rect.top - 5) + 'px';
+    hole.style.left = (rect.left - 5) + 'px';
+    hole.style.width = (rect.width + 10) + 'px';
+    hole.style.height = (rect.height + 10) + 'px';
+  }
+
+  const tt = document.getElementById('tut-title');
+  const td = document.getElementById('tut-desc');
+  if(tt) tt.textContent = s.title;
+  if(td) td.textContent = s.desc;
+
+  const tip = document.getElementById('tut-tip');
+  if(tip) {
+    if (s.pos === 'right') {
+      tip.style.left = (rect.right + 20) + 'px';
+      tip.style.top = rect.top + 'px';
+    } else if (s.pos === 'left') {
+      tip.style.left = (rect.left - 340) + 'px';
+      tip.style.top = rect.top + 'px';
+    } else if (s.pos === 'bottom') {
+      tip.style.top = (rect.bottom + 20) + 'px';
+      tip.style.left = (rect.left + rect.width / 2 - 160) + 'px';
+    } else {
+      let topPos = rect.top - 180;
+      if (topPos < 20) topPos = rect.bottom + 20;
+      tip.style.top = topPos + 'px';
+      tip.style.left = (rect.left + rect.width / 2 - 160) + 'px';
+    }
+  }
+}
+
+function nextTutorialStep() {
+  tutStep++;
+  showTutorialStep();
+}
+
+
+
+// Avatar selection logic
+const avatars = [
+  { id: 'marketer', name: 'Growth Marketer', src: '/avatar_marketer.png' },
+  { id: 'developer', name: 'Code Ninja', src: '/avatar_developer.png' },
+  { id: 'product', name: 'Product Visionary', src: '/avatar_product.png' },
+  { id: 'sales', name: 'Sales Closer', src: '/avatar_sales.png' },
+  { id: 'support', name: 'Support Hero', src: '/avatar_support.png' },
+  { id: 'strategist', name: 'Strategist', src: '/avatar_strategist.png' }
+];
+let currentAvatarId = 'marketer';
+
+function renderAvatarGrid() {
+  const grid = document.getElementById('av-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  avatars.forEach((a, i) => {
+    const item = document.createElement('div');
+    item.className = 'avatar-item' + (currentAvatarId === a.id ? ' selected' : '');
+    item.onclick = () => selectAvatar(a.id);
+    item.innerHTML = `<img src="${a.src}" class="av-img-thumb" /><div class="av-name">${a.name}</div>`;
+    grid.appendChild(item);
+  });
+}
+
+window.selectAvatar = function(id) {
+  currentAvatarId = id;
+  renderAvatarGrid();
+}
+document.addEventListener('DOMContentLoaded', renderAvatarGrid);
+
+
+// Form tracking logic
+function checkFormProgress() {
+  const fields = ['ff-fn', 'ff-ln', 'ff-em', 'ff-ph', 'ff-co', 'ff-ind'];
+  let filled = 0;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    const fr = el ? el.closest('.fr') : null;
+    if (el && el.value.trim().length > 0) {
+      filled++;
+      if (fr) { fr.classList.remove('fr-locked'); fr.classList.add('fr-unlocked'); }
+    } else {
+      if (fr) { fr.classList.add('fr-locked'); fr.classList.remove('fr-unlocked'); }
+    }
+  });
+  
+  // Also require the checkbox
+  const cb = document.getElementById('ff-con');
+  const isCbChecked = cb ? cb.checked : false;
+  
+  const totalFields = fields.length + 1; // plus checkbox
+  const totalFilled = filled + (isCbChecked ? 1 : 0);
+  
+  const progress = (totalFilled / totalFields) * 100;
+  const progBar = document.getElementById('form-prog');
+  if (progBar) progBar.style.width = progress + '%';
+  
+  const btn = document.getElementById('btn-submit-lead');
+  if (btn) {
+    if (totalFilled === totalFields) {
+      if (btn.classList.contains('btn-locked')) {
+        btn.classList.remove('btn-locked');
+        btn.classList.add('btn-unlock-anim');
+        btn.innerHTML = 'Unlock the Game 🔓';
+      }
+    } else {
+      btn.classList.add('btn-locked');
+      btn.classList.remove('btn-unlock-anim');
+      btn.innerHTML = '🔒 Awaiting Data...';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['ff-fn', 'ff-ln', 'ff-em', 'ff-ph', 'ff-co', 'ff-ind', 'ff-con'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.addEventListener('input', checkFormProgress);
+      el.addEventListener('change', checkFormProgress);
+    }
+  });
+});
+
+// Trigger animations on screen show
+const originalShowScreen = showScreen;
+window.showScreen = function(id) {
+  originalShowScreen(id);
+  if (id === 'lead-form-screen') {
+    const rows = document.querySelectorAll('#lead-form-screen .anim-enter');
+    rows.forEach((r, i) => {
+      r.style.animation = `formCascade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards ${i * 0.08}s`;
+    });
+    checkFormProgress();
+  }
+}
+
+// Initialize particles
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+createParticles();
+createFloatingIcons();
+requestAnimationFrame(animate);
+</script>
+
+<!-- ── TUTORIAL OVERLAY ── -->
+<div id="tutorial-overlay">
+  <div class="tutorial-hole" id="tut-hole"></div>
+  <div class="tutorial-tooltip" id="tut-tip">
+    <div class="tutorial-title" id="tut-title">Welcome</div>
+    <div class="tutorial-desc" id="tut-desc">Instructions here</div>
+    <button class="tutorial-btn" onclick="nextTutorialStep()">Next →</button>
+  </div>
+</div>
+
+</body>
+</html>
