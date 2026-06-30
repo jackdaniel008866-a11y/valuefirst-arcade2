@@ -1852,18 +1852,18 @@ function createFloatingIcons() {
 async function renderSplashLeaderboard() {
   let list = await lbGet();
   
-  // Fallback mock data if less than 3 players
+  // Fallback mock data
   const mocks = [
     { name: 'Alex', avatarName: 'Strategist', score: 1420 },
     { name: 'Sarah', avatarName: 'Growth Marketer', score: 1350 },
     { name: 'Jordan', avatarName: 'Code Ninja', score: 1280 }
   ];
   
-  while(list.length < 3) {
-    list.push(mocks[list.length]);
-  }
+  // Combine real players with mock data, sort by highest score
+  const combined = [...list, ...mocks];
+  combined.sort((a, b) => b.score - a.score);
   
-  const top3 = list.slice(0, 3);
+  const top3 = combined.slice(0, 3);
   const container = document.getElementById('splash-lb-rows');
   if(!container) return;
   
